@@ -14,7 +14,7 @@ A modern, full-stack calculator application with a C++ backend engine, Node.js E
 - 🎯 **Real-time Expression Evaluation** - Type expressions like `2+3*5` and get instant results
 - ⌨️ **Full Keyboard Support** - Use keyboard shortcuts for fast calculations
 - 📊 **Calculation History** - View and reuse previous calculations (stored in localStorage)
-- 📥 **PDF Export** - Export your calculation history as a professional PDF report
+- 📥 **Text Export** - Export your calculation history as a formatted text report
 - 🌙 **Dark Mode** - Toggle between light and dark themes with system preference detection
 - 🎨 **Modern UI** - Beautiful gradient design with smooth animations
 - 🚀 **High Performance** - C++ backend for fast calculations
@@ -140,14 +140,13 @@ Visit `http://localhost:3000` 🎉
 - Your preference is automatically saved to localStorage
 - On first visit, the calculator respects your system's dark mode preference
 
-**Export History as PDF:**
-- Click the **📥 Export PDF** button below the history
-- A professional PDF report will be downloaded with:
-  - All calculation history
-  - Timestamps for each calculation
-  - Professional formatting and styling
-  - Summary statistics
-- Filename format: `Calculator_History_YYYY-MM-DD.pdf`
+**Export History as Text:**
+- Click the **📥 Export History (TXT)** button below the history
+- A formatted text report will be downloaded with:
+  - All calculation history with timestamps
+  - Clean, readable formatting
+  - Summary statistics and generation date
+- Filename format: `Calculator_History_YYYY-MM-DD.txt`
 
 **Keyboard Input:**
 - Type numbers: `0-9`
@@ -462,6 +461,7 @@ For issues, questions, or suggestions:
 - [ ] Graphing calculator
 - [ ] Custom function definitions
 - [ ] Export to CSV
+- [ ] Export to PDF
 - [ ] Calculation sharing (via URL)
 
 ---
