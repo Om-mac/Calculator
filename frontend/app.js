@@ -252,163 +252,83 @@ class Calculator {
         const currentDate = new Date().toLocaleString();
         const totalCalculations = this.history.length;
         
-        // Build table rows
+        // Build table rows HTML
         let tableRows = '';
         const historyReversed = [...this.history].reverse();
         
         historyReversed.forEach((item, index) => {
-            tableRows += `
-                <tr style="background-color: ${index % 2 === 0 ? '#f9f9f9' : 'white'};">
-                    <td style="border: 1px solid #ddd; padding: 12px; text-align: center;">${index + 1}</td>
-                    <td style="border: 1px solid #ddd; padding: 12px; font-weight: bold;">${this.escapeHtml(item.expression)}</td>
-                    <td style="border: 1px solid #ddd; padding: 12px; color: #667eea; font-weight: bold; text-align: right;">${item.result}</td>
-                    <td style="border: 1px solid #ddd; padding: 12px; font-size: 12px; color: #999;">${item.timestamp}</td>
-                </tr>
-            `;
+            const bgColor = index % 2 === 0 ? '#f9f9f9' : 'white';
+            tableRows += `<tr style="background-color: ${bgColor};">
+                <td style="border: 1px solid #ddd; padding: 10px; text-align: center; width: 10%;">${index + 1}</td>
+                <td style="border: 1px solid #ddd; padding: 10px; width: 40%;">${this.escapeHtml(item.expression)}</td>
+                <td style="border: 1px solid #ddd; padding: 10px; color: #667eea; font-weight: bold; text-align: right; width: 30%;">${item.result}</td>
+                <td style="border: 1px solid #ddd; padding: 10px; font-size: 12px; width: 20%;">${item.timestamp}</td>
+            </tr>`;
         });
 
-        // Create complete HTML document
-        const htmlContent = `
-            <!DOCTYPE html>
-            <html>
-            <head>
-                <meta charset="UTF-8">
-                <style>
-                    body {
-                        font-family: Arial, sans-serif;
-                        margin: 0;
-                        padding: 20px;
-                        background: white;
-                    }
-                    .header {
-                        text-align: center;
-                        margin-bottom: 30px;
-                        border-bottom: 3px solid #667eea;
-                        padding-bottom: 15px;
-                    }
-                    h1 {
-                        color: #667eea;
-                        margin: 10px 0;
-                        font-size: 28px;
-                    }
-                    .date {
-                        color: #666;
-                        font-size: 14px;
-                        margin: 5px 0;
-                    }
-                    .section {
-                        margin: 30px 0;
-                    }
-                    h2 {
-                        color: #333;
-                        font-size: 18px;
-                        border-bottom: 2px solid #667eea;
-                        padding-bottom: 10px;
-                        margin-bottom: 15px;
-                    }
-                    .summary {
-                        background: #f0f4ff;
-                        padding: 15px;
-                        border-radius: 5px;
-                        font-size: 14px;
-                    }
-                    .summary p {
-                        margin: 8px 0;
-                    }
-                    .summary strong {
-                        color: #667eea;
-                    }
-                    table {
-                        width: 100%;
-                        border-collapse: collapse;
-                        margin-top: 15px;
-                    }
-                    thead tr {
-                        background-color: #667eea;
-                        color: white;
-                    }
-                    th {
-                        border: 1px solid #ddd;
-                        padding: 12px;
-                        text-align: left;
-                        font-weight: bold;
-                    }
-                    td {
-                        border: 1px solid #ddd;
-                        padding: 12px;
-                    }
-                    .footer {
-                        text-align: center;
-                        font-size: 12px;
-                        color: #999;
-                        margin-top: 40px;
-                        border-top: 1px solid #ddd;
-                        padding-top: 20px;
-                    }
-                    .footer a {
-                        color: #667eea;
-                        text-decoration: none;
-                    }
-                </style>
-            </head>
-            <body>
-                <div class="header">
-                    <h1>📊 Calculator History Report</h1>
-                    <div class="date">Generated on ${currentDate}</div>
-                </div>
+        // Create the full HTML document as a string
+        const pdfHTML = `<!DOCTYPE html>
+<html>
+<head>
+<meta charset="UTF-8">
+<title>Calculator History Report</title>
+</head>
+<body style="font-family: Arial, sans-serif; margin: 20px; color: #333;">
 
-                <div class="section">
-                    <h2>Summary</h2>
-                    <div class="summary">
-                        <p><strong>Total Calculations:</strong> ${totalCalculations}</p>
-                        <p><strong>Report Generated:</strong> ${currentDate}</p>
-                    </div>
-                </div>
+<div style="text-align: center; border-bottom: 3px solid #667eea; padding-bottom: 20px; margin-bottom: 30px;">
+    <h1 style="color: #667eea; margin: 0;">📊 Calculator History Report</h1>
+    <p style="color: #666; margin: 10px 0 0 0;">Generated on ${currentDate}</p>
+</div>
 
-                <div class="section">
-                    <h2>Calculation Details</h2>
-                    <table>
-                        <thead>
-                            <tr>
-                                <th style="width: 10%; text-align: center;">No.</th>
-                                <th style="width: 40%;">Expression</th>
-                                <th style="width: 30%; text-align: right;">Result</th>
-                                <th style="width: 20%;">Time</th>
-                            </tr>
-                        </thead>
-                        <tbody>
-                            ${tableRows}
-                        </tbody>
-                    </table>
-                </div>
+<div style="margin-bottom: 30px;">
+    <h2 style="color: #333; border-bottom: 2px solid #667eea; padding-bottom: 10px;">Summary</h2>
+    <div style="background: #f0f4ff; padding: 15px; border-radius: 5px;">
+        <p><strong>Total Calculations:</strong> ${totalCalculations}</p>
+        <p><strong>Report Generated:</strong> ${currentDate}</p>
+    </div>
+</div>
 
-                <div class="footer">
-                    <p>This report was generated by <strong>Calculator v1.0.0</strong></p>
-                    <p><a href="https://github.com/Om-mac/Calculator">View on GitHub</a></p>
-                </div>
-            </body>
-            </html>
-        `;
+<div>
+    <h2 style="color: #333; border-bottom: 2px solid #667eea; padding-bottom: 10px;">Calculation Details</h2>
+    <table style="width: 100%; border-collapse: collapse; margin-top: 15px;">
+        <thead>
+            <tr style="background-color: #667eea; color: white;">
+                <th style="border: 1px solid #ddd; padding: 10px; text-align: center; width: 10%;">No.</th>
+                <th style="border: 1px solid #ddd; padding: 10px; text-align: left; width: 40%;">Expression</th>
+                <th style="border: 1px solid #ddd; padding: 10px; text-align: right; width: 30%;">Result</th>
+                <th style="border: 1px solid #ddd; padding: 10px; text-align: left; width: 20%;">Time</th>
+            </tr>
+        </thead>
+        <tbody>
+            ${tableRows}
+        </tbody>
+    </table>
+</div>
 
-        // Create blob and download
-        const blob = new Blob([htmlContent], { type: 'text/html' });
-        const url = window.URL.createObjectURL(blob);
-        
-        // Use html2pdf to convert HTML to PDF
-        const element = document.createElement('div');
-        element.innerHTML = htmlContent;
+<div style="margin-top: 40px; text-align: center; border-top: 1px solid #ddd; padding-top: 20px; font-size: 12px; color: #999;">
+    <p>This report was generated by <strong>Calculator v1.0.0</strong></p>
+    <p><a href="https://github.com/Om-mac/Calculator" style="color: #667eea; text-decoration: none;">View on GitHub</a></p>
+</div>
 
+</body>
+</html>`;
+
+        // Use html2pdf to convert to PDF
         const opt = {
             margin: 10,
             filename: `Calculator_History_${new Date().toISOString().split('T')[0]}.pdf`,
             image: { type: 'jpeg', quality: 0.98 },
-            html2canvas: { scale: 2, useCORS: true },
+            html2canvas: { scale: 2, useCORS: true, logging: false },
             jsPDF: { orientation: 'portrait', unit: 'mm', format: 'a4' }
         };
 
-        html2pdf().set(opt).from(htmlContent, 'string').save();
-        
-        this.updateStatus('✅ PDF exported successfully!', 'success');
+        try {
+            html2pdf().set(opt).from(pdfHTML, 'string').save();
+            this.updateStatus('✅ PDF exported successfully!', 'success');
+        } catch (error) {
+            console.error('PDF export error:', error);
+            this.updateStatus('Error exporting PDF', 'error');
+        }
     }
 
     escapeHtml(text) {
