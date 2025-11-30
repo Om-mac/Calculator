@@ -258,158 +258,92 @@ class Calculator {
         console.log('[DEBUG] Creating PDF with html2pdf');
 
         try {
-            // html2pdf bundle includes jsPDF, access it via the bundle
-            const jsPDF = window.jsPDF.jsPDF || window.jsPDF;
-            console.log('[DEBUG] jsPDF available:', typeof jsPDF);
-            
-            if (!jsPDF || typeof jsPDF !== 'function') {
-                throw new Error('jsPDF not properly loaded from html2pdf bundle');
+            // Check if html2pdf is available
+            if (typeof html2pdf === 'undefined') {
+                throw new Error('html2pdf library not loaded');
             }
 
-            // Create PDF document
-            const doc = new jsPDF({
-                orientation: 'portrait',
-                unit: 'mm',
-                format: 'a4'
+            console.log('[DEBUG] html2pdf available:', typeof html2pdf);
+
+            // Build the HTML content for the PDF
+            let tableRows = '';
+            const historyReversed = [...this.history].reverse();
+            
+            historyReversed.forEach((item, index) => {
+                const bgColor = index % 2 === 0 ? '#f9f9f9' : 'white';
+                tableRows += `<tr style="background-color: ${bgColor};">
+                    <td style="border: 1px solid #ddd; padding: 10px; text-align: center;">${index + 1}</td>
+                    <td style="border: 1px solid #ddd; padding: 10px;">${this.escapeHtml(item.expression)}</td>
+                    <td style="border: 1px solid #ddd; padding: 10px; color: #667eea; font-weight: bold; text-align: right;">${item.result}</td>
+                    <td style="border: 1px solid #ddd; padding: 10px; font-size: 12px;">${item.timestamp}</td>
+                </tr>`;
             });
 
-        let yPosition = 20;
-        const pageWidth = doc.internal.pageSize.getWidth();
-        const pageHeight = doc.internal.pageSize.getHeight();
-        const margin = 10;
-        const contentWidth = pageWidth - (2 * margin);
+            const element = document.createElement('div');
+            element.innerHTML = `
+                <div style="font-family: Arial, sans-serif; color: #333; padding: 20px;">
+                    <div style="text-align: center; border-bottom: 3px solid #667eea; padding-bottom: 20px; margin-bottom: 20px;">
+                        <h1 style="color: #667eea; margin: 0; font-size: 24px;">📊 Calculator History Report</h1>
+                        <p style="color: #666; margin: 10px 0 0 0;">Generated on ${currentDate}</p>
+                    </div>
 
-        // Add title
-        doc.setFontSize(24);
-        doc.setTextColor(102, 126, 234); // #667eea
-        doc.text('📊 Calculator History Report', margin, yPosition);
-        yPosition += 10;
+                    <div style="margin-bottom: 20px;">
+                        <h2 style="color: #333; font-size: 16px; border-bottom: 2px solid #667eea; padding-bottom: 8px; margin-bottom: 10px;">Summary</h2>
+                        <div style="background: #f0f4ff; padding: 12px; border-radius: 4px; font-size: 13px;">
+                            <p style="margin: 5px 0;"><strong style="color: #667eea;">Total Calculations:</strong> ${totalCalculations}</p>
+                            <p style="margin: 5px 0;"><strong style="color: #667eea;">Report Generated:</strong> ${currentDate}</p>
+                        </div>
+                    </div>
 
-        // Add generation date
-        doc.setFontSize(12);
-        doc.setTextColor(100, 100, 100);
-        doc.text(`Generated on ${currentDate}`, margin, yPosition);
-        yPosition += 15;
+                    <div>
+                        <h2 style="color: #333; font-size: 16px; border-bottom: 2px solid #667eea; padding-bottom: 8px; margin-bottom: 10px;">Calculation Details</h2>
+                        <table style="width: 100%; border-collapse: collapse; font-size: 12px;">
+                            <thead>
+                                <tr style="background-color: #667eea; color: white;">
+                                    <th style="border: 1px solid #ddd; padding: 10px; text-align: center; width: 8%;">No.</th>
+                                    <th style="border: 1px solid #ddd; padding: 10px; text-align: left; width: 40%;">Expression</th>
+                                    <th style="border: 1px solid #ddd; padding: 10px; text-align: right; width: 30%;">Result</th>
+                                    <th style="border: 1px solid #ddd; padding: 10px; text-align: left; width: 22%;">Time</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                ${tableRows}
+                            </tbody>
+                        </table>
+                    </div>
 
-        // Add horizontal line
-        doc.setDrawColor(102, 126, 234);
-        doc.line(margin, yPosition, pageWidth - margin, yPosition);
-        yPosition += 8;
+                    <div style="margin-top: 20px; text-align: center; border-top: 1px solid #ddd; padding-top: 10px; font-size: 11px; color: #999;">
+                        <p style="margin: 3px 0;"><strong>Calculator v1.0.0</strong></p>
+                        <p style="margin: 3px 0;">https://github.com/Om-mac/Calculator</p>
+                    </div>
+                </div>
+            `;
 
-        // Summary section
-        doc.setFontSize(14);
-        doc.setTextColor(51, 51, 51);
-        doc.text('Summary', margin, yPosition);
-        yPosition += 8;
+            const opt = {
+                margin: 10,
+                filename: `Calculator_History_${new Date().toISOString().split('T')[0]}.pdf`,
+                image: { type: 'jpeg', quality: 0.98 },
+                html2canvas: { scale: 2, useCORS: true, logging: false, backgroundColor: '#ffffff' },
+                jsPDF: { orientation: 'portrait', unit: 'mm', format: 'a4' }
+            };
 
-        // Summary box background
-        doc.setFillColor(240, 244, 255);
-        doc.rect(margin, yPosition - 5, contentWidth, 25, 'F');
+            console.log('[DEBUG] About to generate PDF with html2pdf');
+            
+            html2pdf().set(opt).from(element).save().then(() => {
+                console.log('[DEBUG] PDF generated and saved successfully');
+                this.updateStatus('✅ PDF exported successfully!', 'success');
+            }).catch((error) => {
+                console.error('[ERROR] During save:', error);
+                this.updateStatus('Error saving PDF', 'error');
+            });
 
-        doc.setFontSize(11);
-        doc.setTextColor(102, 126, 234);
-        doc.text(`Total Calculations: ${totalCalculations}`, margin + 5, yPosition + 3);
-        doc.text(`Report Generated: ${currentDate}`, margin + 5, yPosition + 10);
-        yPosition += 30;
-
-        // Table section
-        doc.setFontSize(14);
-        doc.setTextColor(51, 51, 51);
-        doc.text('Calculation Details', margin, yPosition);
-        yPosition += 8;
-
-        // Table header
-        doc.setFillColor(102, 126, 234);
-        doc.setTextColor(255, 255, 255);
-        doc.setFontSize(11);
-        doc.setFont(undefined, 'bold');
-
-        const colWidths = [10, 80, 60, 40];
-        const headers = ['No.', 'Expression', 'Result', 'Time'];
-        let xPos = margin;
-
-        // Draw header cells
-        headers.forEach((header, index) => {
-            doc.rect(xPos, yPosition, colWidths[index], 8, 'F');
-            doc.text(header, xPos + 2, yPosition + 5);
-            xPos += colWidths[index];
-        });
-
-        yPosition += 10;
-        doc.setFont(undefined, 'normal');
-        doc.setTextColor(0, 0, 0);
-
-        // Add table rows
-        const historyReversed = [...this.history].reverse();
-        let rowNum = 1;
-
-        historyReversed.forEach((item, index) => {
-            // Check if we need a new page
-            if (yPosition > pageHeight - 20) {
-                doc.addPage();
-                yPosition = 15;
-            }
-
-            // Alternate row colors
-            if (index % 2 === 0) {
-                doc.setFillColor(249, 249, 249);
-                xPos = margin;
-                doc.rect(xPos, yPosition - 3, contentWidth, 7, 'F');
-            }
-
-            doc.setFontSize(10);
-            xPos = margin;
-
-            // Row number
-            doc.text(rowNum.toString(), xPos + 2, yPosition + 1);
-            xPos += colWidths[0];
-
-            // Expression
-            const expressionText = this.escapeHtml(item.expression);
-            doc.text(expressionText, xPos + 2, yPosition + 1);
-            xPos += colWidths[1];
-
-            // Result
-            doc.setTextColor(102, 126, 234);
-            doc.setFont(undefined, 'bold');
-            doc.text(item.result.toString(), xPos + 2, yPosition + 1);
-            doc.setFont(undefined, 'normal');
-            doc.setTextColor(0, 0, 0);
-            xPos += colWidths[2];
-
-            // Time
-            doc.setFontSize(9);
-            doc.text(item.timestamp, xPos + 2, yPosition + 1);
-            doc.setFontSize(10);
-
-            yPosition += 8;
-            rowNum++;
-        });
-
-        // Add footer
-        yPosition += 10;
-        doc.setDrawColor(102, 126, 234);
-        doc.line(margin, yPosition, pageWidth - margin, yPosition);
-        yPosition += 5;
-
-        doc.setFontSize(10);
-        doc.setTextColor(153, 153, 153);
-        doc.text('Calculator v1.0.0 | https://github.com/Om-mac/Calculator', margin, yPosition);
-
-        // Save the PDF
-        doc.save(`Calculator_History_${new Date().toISOString().split('T')[0]}.pdf`);
-        
-        console.log('[DEBUG] PDF generated and saved successfully');
-        this.updateStatus('✅ PDF exported successfully!', 'success');
         } catch (error) {
             console.error('[ERROR] PDF export failed:', error);
             console.error('[ERROR] Error message:', error.message);
             console.error('[ERROR] Stack:', error.stack);
             this.updateStatus(`Error: ${error.message}`, 'error');
         }
-    }
-
-    escapeHtml(text) {
+    }    escapeHtml(text) {
         const map = {
             '&': '&amp;',
             '<': '&lt;',
