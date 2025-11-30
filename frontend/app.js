@@ -20,7 +20,8 @@ class Calculator {
         this.resultDisplay = document.getElementById('result');
         this.historyList = document.getElementById('history-list');
         this.clearHistoryBtn = document.getElementById('clear-history');
-        this.exportPdfBtn = document.getElementById('export-pdf');
+        this.exportToggle = document.getElementById('export-toggle');
+        this.exportDropdown = document.getElementById('export-dropdown');
         this.status = document.getElementById('status');
         this.buttons = document.querySelectorAll('.btn');
         this.themeToggle = document.getElementById('theme-toggle');
@@ -40,14 +41,43 @@ class Calculator {
         // Clear history
         this.clearHistoryBtn.addEventListener('click', () => this.clearHistory());
 
-        // Export PDF
-        this.exportPdfBtn.addEventListener('click', () => this.exportToPDF());
+        // Export menu toggle
+        this.exportToggle.addEventListener('click', () => this.toggleExportMenu());
+
+        // Export options
+        const exportOptions = document.querySelectorAll('.export-option');
+        exportOptions.forEach(option => {
+            option.addEventListener('click', (e) => {
+                const format = e.currentTarget.dataset.format;
+                this.closeExportMenu();
+                if (format === 'csv') {
+                    this.exportToCSV();
+                } else if (format === 'txt') {
+                    this.exportToTXT();
+                }
+            });
+        });
 
         // History item click
         this.historyList.addEventListener('click', (e) => this.handleHistoryClick(e));
 
         // Theme toggle
         this.themeToggle.addEventListener('click', () => this.toggleDarkMode());
+
+        // Close export menu when clicking outside
+        document.addEventListener('click', (e) => {
+            if (!e.target.closest('.export-menu')) {
+                this.closeExportMenu();
+            }
+        });
+    }
+
+    toggleExportMenu() {
+        this.exportDropdown.classList.toggle('active');
+    }
+
+    closeExportMenu() {
+        this.exportDropdown.classList.remove('active');
     }
 
     toggleDarkMode() {
@@ -240,24 +270,6 @@ class Calculator {
             this.saveHistory();
             this.renderHistory();
             this.updateStatus('History cleared', 'success');
-        }
-    }
-
-    exportToPDF() {
-        console.log('[DEBUG] Export button clicked');
-        
-        if (this.history.length === 0) {
-            this.updateStatus('No calculations to export', 'error');
-            return;
-        }
-
-        // Show export format dialog
-        const choice = confirm('Choose export format:\n\nOK = CSV\nCancel = TXT');
-        
-        if (choice) {
-            this.exportToCSV();
-        } else {
-            this.exportToTXT();
         }
     }
 

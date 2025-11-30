@@ -165,12 +165,24 @@ body.dark-mode {
     width: 100%;
     padding: 18px;
     font-size: 18px;
-    border: 2px solid var(--border-light);
     border-radius: 12px;
-    transition: all 0.3s ease;
-    background: white;
+    background: linear-gradient(180deg, rgba(255, 255, 255, 0.7) 0%, rgba(255, 255, 255, 0.4) 100%);
+    border: 2px solid rgba(102, 126, 234, 0.2);
     color: var(--text-primary-light);
-    box-shadow: 0 2px 8px rgba(0, 0, 0, 0.08);
+    backdrop-filter: blur(10px) saturate(130%);
+    -webkit-backdrop-filter: blur(10px) saturate(130%);
+    box-shadow: 0 8px 32px rgba(102, 126, 234, 0.1), inset 0 1px 0 rgba(255, 255, 255, 0.8);
+    transition: all 0.3s ease;
+    font-family: 'Segoe UI', sans-serif;
+}
+
+.expression-input:focus,
+.result-display:focus {
+    outline: none;
+    border-color: var(--primary-color);
+    background: linear-gradient(180deg, rgba(255, 255, 255, 0.85) 0%, rgba(255, 255, 255, 0.5) 100%);
+    box-shadow: 0 0 0 4px rgba(102, 126, 234, 0.15), 0 12px 35px rgba(102, 126, 234, 0.2);
+    transform: translateY(-2px);
 }
 
 .calculator.dark-mode .expression-input,
@@ -341,7 +353,6 @@ body.dark-mode {
     background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
     color: white;
     width: 100%;
-    margin-top: 10px;
     transition: all 0.3s ease;
     box-shadow: 0 5px 20px rgba(102, 126, 234, 0.3);
 }
@@ -355,6 +366,84 @@ body.dark-mode {
     display: flex;
     flex-direction: column;
     gap: 10px;
+}
+
+.export-menu {
+    position: relative;
+    width: 100%;
+}
+
+.export-dropdown {
+    position: absolute;
+    top: 100%;
+    left: 0;
+    right: 0;
+    background: white;
+    border-radius: 12px;
+    margin-top: 8px;
+    box-shadow: 0 8px 32px rgba(0, 0, 0, 0.15);
+    overflow: hidden;
+    opacity: 0;
+    visibility: hidden;
+    transform: translateY(-10px);
+    transition: all 0.3s cubic-bezier(0.34, 1.56, 0.64, 1);
+    z-index: 1000;
+    border: 1px solid rgba(102, 126, 234, 0.2);
+}
+
+.export-dropdown.active {
+    opacity: 1;
+    visibility: visible;
+    transform: translateY(0);
+}
+
+.calculator.dark-mode .export-dropdown {
+    background: linear-gradient(135deg, #16213e 0%, #0f3460 100%);
+    border-color: rgba(102, 126, 234, 0.3);
+    box-shadow: 0 8px 32px rgba(0, 0, 0, 0.4);
+}
+
+.export-option {
+    width: 100%;
+    padding: 16px 18px;
+    border: none;
+    background: transparent;
+    color: var(--text-primary-light);
+    cursor: pointer;
+    transition: all 0.2s ease;
+    font-size: 15px;
+    font-weight: 600;
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    text-align: left;
+    font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+}
+
+.export-option:hover {
+    background: linear-gradient(135deg, #f0f4ff 0%, #f5f0ff 100%);
+    padding-left: 22px;
+}
+
+.export-option:first-child {
+    border-bottom: 1px solid rgba(102, 126, 234, 0.1);
+}
+
+.calculator.dark-mode .export-option {
+    color: var(--text-primary-dark);
+}
+
+.calculator.dark-mode .export-option:hover {
+    background: rgba(102, 126, 234, 0.15);
+}
+
+.option-icon {
+    font-size: 18px;
+    min-width: 24px;
+}
+
+.option-text {
+    flex: 1;
 }
 
 .history-section {

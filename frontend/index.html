@@ -17,8 +17,8 @@
             </div>
             
             <div class="display-section">
-                <input type="text" id="expression" class="expression-input" placeholder="Enter expression (e.g., 2+3*5)" autocomplete="off">
-                <input type="text" id="result" class="result-display" placeholder="Result" readonly>
+                <input type="text" id="expression" class="expression-input" placeholder="" autocomplete="off">
+                <input type="text" id="result" class="result-display" placeholder="" readonly>
             </div>
 
             <div class="button-grid">
@@ -58,7 +58,19 @@
                 <ul id="history-list" class="history-list"></ul>
                 <div class="history-buttons">
                     <button class="btn btn-clear-history" id="clear-history">Clear History</button>
-                    <button class="btn btn-export-pdf" id="export-pdf">📥 Export</button>
+                    <div class="export-menu">
+                        <button class="btn btn-export-pdf" id="export-toggle">📥 Export ▼</button>
+                        <div class="export-dropdown" id="export-dropdown">
+                            <button class="export-option" data-format="csv">
+                                <span class="option-icon">📊</span>
+                                <span class="option-text">Export as CSV</span>
+                            </button>
+                            <button class="export-option" data-format="txt">
+                                <span class="option-icon">📄</span>
+                                <span class="option-text">Export as TXT</span>
+                            </button>
+                        </div>
+                    </div>
                 </div>
             </div>
 
@@ -67,6 +79,6 @@
     </div>
 
     <script src="https://cdnjs.cloudflare.com/ajax/libs/html2pdf.js/0.10.1/html2pdf.bundle.min.js"></script>
-    <script src="app.js?v=12.0"></script>
+    <script src="app.js?v=13.0"></script>
 </body>
 </html>
