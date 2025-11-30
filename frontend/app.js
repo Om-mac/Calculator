@@ -253,114 +253,224 @@ class Calculator {
         }
 
         try {
+            if (typeof jsPDF === 'undefined' && typeof window.jsPDF === 'undefined') {
+                console.log('[DEBUG] jsPDF not available, trying html2pdf');
+                this.exportWithHtml2pdf();
+                return;
+            }
+
+            // Use jsPDF directly (it comes bundled with html2pdf)
+            const JsPDF = window.jsPDF?.jsPDF || window.jsPDF;
+            
+            if (!JsPDF) {
+                console.error('[ERROR] jsPDF not found');
+                this.exportWithHtml2pdf();
+                return;
+            }
+
+            console.log('[DEBUG] Using jsPDF for PDF generation');
+
+            const doc = new JsPDF({
+                orientation: 'portrait',
+                unit: 'mm',
+                format: 'a4'
+            });
+
+            const historyReversed = [...this.history].reverse();
+            const pageWidth = doc.internal.pageSize.getWidth();
+            const pageHeight = doc.internal.pageSize.getHeight();
+            const margin = 15;
+            let yPosition = 20;
+
+            // Title
+            doc.setFontSize(18);
+            doc.setTextColor(102, 126, 234);
+            doc.text('Calculator History Report', margin, yPosition);
+            yPosition += 8;
+
+            // Date
+            doc.setFontSize(10);
+            doc.setTextColor(100, 100, 100);
+            const currentDate = new Date().toLocaleString();
+            doc.text(`Generated on ${currentDate}`, margin, yPosition);
+            yPosition += 12;
+
+            // Summary box
+            doc.setFillColor(240, 244, 255);
+            doc.rect(margin, yPosition, pageWidth - 2 * margin, 20, 'F');
+            doc.setFontSize(11);
+            doc.setTextColor(102, 126, 234);
+            doc.text('Summary', margin + 5, yPosition + 5);
+            doc.setFontSize(10);
+            doc.text(`Total Calculations: ${historyReversed.length}`, margin + 5, yPosition + 10);
+            doc.text(`Report Generated: ${currentDate}`, margin + 5, yPosition + 15);
+            yPosition += 25;
+
+            // Table header
+            doc.setFillColor(102, 126, 234);
+            doc.setTextColor(255, 255, 255);
+            doc.setFontSize(10);
+            doc.setFont(undefined, 'bold');
+
+            const col1 = margin;
+            const col2 = margin + 12;
+            const col3 = margin + 70;
+            const col4 = pageWidth - margin - 30;
+
+            doc.rect(margin, yPosition, pageWidth - 2 * margin, 7, 'F');
+            doc.text('No.', col1 + 2, yPosition + 5);
+            doc.text('Expression', col2 + 2, yPosition + 5);
+            doc.text('Result', col3 + 2, yPosition + 5);
+            doc.text('Time', col4 + 2, yPosition + 5);
+            yPosition += 8;
+
+            // Table data
+            doc.setFont(undefined, 'normal');
+            doc.setTextColor(0, 0, 0);
+            doc.setFontSize(9);
+
+            historyReversed.forEach((item, index) => {
+                // Check if we need a new page
+                if (yPosition > pageHeight - 20) {
+                    doc.addPage();
+                    yPosition = margin;
+
+                    // Repeat header on new page
+                    doc.setFillColor(102, 126, 234);
+                    doc.setTextColor(255, 255, 255);
+                    doc.setFont(undefined, 'bold');
+                    doc.rect(margin, yPosition, pageWidth - 2 * margin, 7, 'F');
+                    doc.text('No.', col1 + 2, yPosition + 5);
+                    doc.text('Expression', col2 + 2, yPosition + 5);
+                    doc.text('Result', col3 + 2, yPosition + 5);
+                    doc.text('Time', col4 + 2, yPosition + 5);
+                    yPosition += 8;
+
+                    doc.setFont(undefined, 'normal');
+                    doc.setTextColor(0, 0, 0);
+                }
+
+                // Alternating row colors
+                if (index % 2 === 0) {
+                    doc.setFillColor(249, 249, 249);
+                    doc.rect(margin, yPosition, pageWidth - 2 * margin, 6, 'F');
+                }
+
+                // Row data
+                const num = (index + 1).toString();
+                const expr = this.escapeHtml(item.expression).substring(0, 25);
+                const result = item.result.toString();
+                const time = item.timestamp;
+
+                doc.setTextColor(0, 0, 0);
+                doc.text(num, col1 + 2, yPosition + 4);
+                doc.text(expr, col2 + 2, yPosition + 4);
+
+                doc.setTextColor(102, 126, 234);
+                doc.setFont(undefined, 'bold');
+                doc.text(result, col3 + 2, yPosition + 4);
+
+                doc.setTextColor(100, 100, 100);
+                doc.setFont(undefined, 'normal');
+                doc.text(time, col4 + 2, yPosition + 4);
+
+                yPosition += 7;
+            });
+
+            // Footer
+            yPosition = pageHeight - 10;
+            doc.setFontSize(9);
+            doc.setTextColor(150, 150, 150);
+            doc.text('Calculator v1.0.0 | github.com/Om-mac/Calculator', margin, yPosition);
+
+            // Save
+            const filename = `Calculator_History_${new Date().toISOString().split('T')[0]}.pdf`;
+            doc.save(filename);
+            
+            console.log('[DEBUG] PDF saved successfully:', filename);
+            this.updateStatus(`✅ PDF exported: ${filename}`, 'success');
+
+        } catch (error) {
+            console.error('[ERROR] PDF export failed:', error);
+            this.exportWithHtml2pdf();
+        }
+    }
+
+    exportWithHtml2pdf() {
+        console.log('[DEBUG] Using html2pdf fallback method');
+        
+        try {
             if (typeof html2pdf === 'undefined') {
                 throw new Error('html2pdf library not loaded');
             }
 
+            const historyReversed = [...this.history].reverse();
             const currentDate = new Date().toLocaleString();
             const totalCalculations = this.history.length;
-            const historyReversed = [...this.history].reverse();
 
-            console.log('[DEBUG] Creating PDF with html2pdf');
-            
-            // Build simple, flat HTML that html2canvas can render reliably
-            let tableRows = '';
-            historyReversed.forEach((item, index) => {
-                const bgColor = index % 2 === 0 ? '#f9f9f9' : '#ffffff';
-                tableRows += `
-                    <tr style="background-color: ${bgColor};">
-                        <td style="border: 1px solid #ccc; padding: 6px; text-align: center; width: 8%; font-size: 10px;">${index + 1}</td>
-                        <td style="border: 1px solid #ccc; padding: 6px; width: 55%; font-size: 10px; word-break: break-word;">${this.escapeHtml(item.expression)}</td>
-                        <td style="border: 1px solid #ccc; padding: 6px; text-align: right; width: 18%; font-size: 10px; font-weight: bold; color: #667eea;">${item.result}</td>
-                        <td style="border: 1px solid #ccc; padding: 6px; text-align: center; width: 19%; font-size: 9px;">${item.timestamp}</td>
-                    </tr>
-                `;
+            // Build simple HTML
+            let rows = '';
+            historyReversed.forEach((item, idx) => {
+                rows += `<tr>
+                    <td style="border:1px solid #ccc;padding:8px;text-align:center;">${idx + 1}</td>
+                    <td style="border:1px solid #ccc;padding:8px;">${this.escapeHtml(item.expression)}</td>
+                    <td style="border:1px solid #ccc;padding:8px;text-align:right;color:#667eea;font-weight:bold;">${item.result}</td>
+                    <td style="border:1px solid #ccc;padding:8px;">${item.timestamp}</td>
+                </tr>`;
             });
 
-            const htmlString = `
-                <div style="font-family: Arial, sans-serif; color: #333; margin: 0; padding: 0; background: white;">
-                    <div style="text-align: center; margin-bottom: 30px; border-bottom: 3px solid #667eea; padding-bottom: 20px;">
-                        <h1 style="color: #667eea; margin: 0 0 5px 0; font-size: 28px;">📊 Calculator History Report</h1>
-                        <p style="color: #888; margin: 0; font-size: 13px;">Generated on ${currentDate}</p>
+            const html = `
+                <div style="font-family:Arial;color:#333;padding:20px;">
+                    <h1 style="color:#667eea;margin-bottom:5px;">Calculator History Report</h1>
+                    <p style="color:#999;margin-bottom:20px;">Generated on ${currentDate}</p>
+                    
+                    <div style="background:#f0f4ff;border:1px solid #d0deff;padding:15px;margin-bottom:20px;border-radius:4px;">
+                        <h3 style="color:#667eea;margin-top:0;">Summary</h3>
+                        <p>Total Calculations: <strong>${totalCalculations}</strong></p>
+                        <p>Report Generated: <strong>${currentDate}</strong></p>
                     </div>
 
-                    <div style="background: #f0f4ff; border: 1px solid #d0deff; border-radius: 5px; padding: 15px; margin-bottom: 25px;">
-                        <h3 style="color: #667eea; margin: 0 0 10px 0; font-size: 14px;">📈 Summary</h3>
-                        <p style="margin: 5px 0; font-size: 12px;">
-                            <strong style="color: #667eea;">Total Calculations:</strong> ${totalCalculations}
-                        </p>
-                        <p style="margin: 5px 0; font-size: 12px;">
-                            <strong style="color: #667eea;">Report Generated:</strong> ${currentDate}
-                        </p>
-                    </div>
+                    <h3 style="color:#333;margin-bottom:10px;">Calculation Details</h3>
+                    <table style="width:100%;border-collapse:collapse;">
+                        <thead>
+                            <tr style="background:#667eea;color:white;">
+                                <th style="border:1px solid #667eea;padding:10px;text-align:center;">No.</th>
+                                <th style="border:1px solid #667eea;padding:10px;text-align:left;">Expression</th>
+                                <th style="border:1px solid #667eea;padding:10px;text-align:right;">Result</th>
+                                <th style="border:1px solid #667eea;padding:10px;">Time</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            ${rows}
+                        </tbody>
+                    </table>
 
-                    <div>
-                        <h3 style="color: #333; margin: 0 0 10px 0; font-size: 14px; border-bottom: 2px solid #667eea; padding-bottom: 8px;">Calculation Details (All ${totalCalculations})</h3>
-                        <table style="width: 100%; border-collapse: collapse; margin-top: 10px;">
-                            <thead>
-                                <tr style="background-color: #667eea; color: white;">
-                                    <th style="border: 1px solid #667eea; padding: 8px; text-align: center; font-size: 11px; font-weight: bold; width: 8%;">No.</th>
-                                    <th style="border: 1px solid #667eea; padding: 8px; text-align: left; font-size: 11px; font-weight: bold; width: 55%;">Expression</th>
-                                    <th style="border: 1px solid #667eea; padding: 8px; text-align: right; font-size: 11px; font-weight: bold; width: 18%;">Result</th>
-                                    <th style="border: 1px solid #667eea; padding: 8px; text-align: center; font-size: 11px; font-weight: bold; width: 19%;">Time</th>
-                                </tr>
-                            </thead>
-                            <tbody>
-                                ${tableRows}
-                            </tbody>
-                        </table>
-                    </div>
-
-                    <div style="margin-top: 30px; text-align: center; border-top: 1px solid #ddd; padding-top: 15px; font-size: 10px; color: #999;">
-                        <p style="margin: 3px 0;"><strong>Calculator v1.0.0</strong></p>
-                        <p style="margin: 3px 0;">https://github.com/Om-mac/Calculator</p>
+                    <div style="margin-top:30px;text-align:center;border-top:1px solid #ccc;padding-top:15px;font-size:10px;color:#999;">
+                        <p>Calculator v1.0.0</p>
+                        <p>https://github.com/Om-mac/Calculator</p>
                     </div>
                 </div>
             `;
-
-            // Create a proper element for html2pdf
-            const element = document.createElement('div');
-            element.innerHTML = htmlString;
-            element.style.padding = '20px';
-            element.style.backgroundColor = 'white';
-            element.style.minHeight = '400px';
-            
-            console.log('[DEBUG] HTML element created, table contains', historyReversed.length, 'rows');
 
             const opt = {
                 margin: 10,
                 filename: `Calculator_History_${new Date().toISOString().split('T')[0]}.pdf`,
                 image: { type: 'jpeg', quality: 0.98 },
-                html2canvas: { 
-                    scale: 2,
-                    logging: true,
-                    useCORS: true,
-                    allowTaint: true,
-                    backgroundColor: '#ffffff',
-                    windowHeight: 1200,
-                    windowWidth: 800
-                },
+                html2canvas: { scale: 1.5, useCORS: true, allowTaint: true },
                 jsPDF: { orientation: 'portrait', unit: 'mm', format: 'a4' }
             };
 
-            console.log('[DEBUG] Starting html2pdf with options:', opt);
-
-            html2pdf()
-                .set(opt)
-                .from(element)
-                .save()
-                .then(() => {
-                    console.log('[DEBUG] PDF export completed successfully');
-                    this.updateStatus('✅ PDF exported successfully with all ' + totalCalculations + ' calculations!', 'success');
-                })
-                .catch((error) => {
-                    console.error('[ERROR] PDF save failed:', error);
-                    this.updateStatus('Error saving PDF: ' + error.message, 'error');
-                });
+            html2pdf().set(opt).from(html).save().then(() => {
+                console.log('[DEBUG] html2pdf export completed');
+                this.updateStatus('✅ PDF exported successfully!', 'success');
+            }).catch(err => {
+                console.error('[ERROR] html2pdf failed:', err);
+                this.updateStatus('PDF export failed', 'error');
+            });
 
         } catch (error) {
-            console.error('[ERROR] PDF export failed:', error);
-            this.updateStatus('Error exporting PDF: ' + error.message, 'error');
+            console.error('[ERROR] html2pdf fallback failed:', error);
+            this.updateStatus('Error: ' + error.message, 'error');
         }
     }
 
