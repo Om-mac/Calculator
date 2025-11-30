@@ -277,14 +277,8 @@ class Calculator {
                 `;
             });
 
-            const htmlContent = `
-                <!DOCTYPE html>
-                <html>
-                <head>
-                    <meta charset="UTF-8">
-                    <title>Calculator History Report</title>
-                </head>
-                <body style="font-family: Arial, sans-serif; color: #333; margin: 0; padding: 20px; background: white;">
+            const htmlString = `
+                <div style="font-family: Arial, sans-serif; color: #333; margin: 0; padding: 0; background: white;">
                     <div style="text-align: center; margin-bottom: 30px; border-bottom: 3px solid #667eea; padding-bottom: 20px;">
                         <h1 style="color: #667eea; margin: 0 0 5px 0; font-size: 28px;">📊 Calculator History Report</h1>
                         <p style="color: #888; margin: 0; font-size: 13px;">Generated on ${currentDate}</p>
@@ -321,13 +315,20 @@ class Calculator {
                         <p style="margin: 3px 0;"><strong>Calculator v1.0.0</strong></p>
                         <p style="margin: 3px 0;">https://github.com/Om-mac/Calculator</p>
                     </div>
-                </body>
-                </html>
+                </div>
             `;
 
-            const element = document.createElement('div');
-            element.innerHTML = htmlContent;
-            document.body.appendChild(element);
+            // Create temporary container that's in the DOM but hidden
+            const tempContainer = document.createElement('div');
+            tempContainer.style.position = 'absolute';
+            tempContainer.style.left = '-10000px';
+            tempContainer.style.width = '800px';
+            tempContainer.style.backgroundColor = 'white';
+            tempContainer.innerHTML = htmlString;
+            document.body.appendChild(tempContainer);
+
+            console.log('[DEBUG] Temp container added to DOM, starting pdf conversion');
+            console.log('[DEBUG] Table contains', historyReversed.length, 'rows');
 
             const opt = {
                 margin: 8,
@@ -338,26 +339,25 @@ class Calculator {
                     logging: false,
                     useCORS: true,
                     allowTaint: true,
-                    backgroundColor: '#ffffff',
-                    windowHeight: 1400
+                    backgroundColor: '#ffffff'
                 },
                 jsPDF: { orientation: 'portrait', unit: 'mm', format: 'a4' }
             };
 
-            console.log('[DEBUG] Starting html2pdf conversion');
-            
             html2pdf()
                 .set(opt)
-                .from(element)
+                .from(tempContainer)
                 .save()
                 .then(() => {
                     console.log('[DEBUG] PDF export completed successfully');
-                    document.body.removeChild(element);
+                    document.body.removeChild(tempContainer);
                     this.updateStatus('✅ PDF exported successfully with all ' + totalCalculations + ' calculations!', 'success');
                 })
                 .catch((error) => {
                     console.error('[ERROR] PDF save failed:', error);
-                    document.body.removeChild(element);
+                    if (document.body.contains(tempContainer)) {
+                        document.body.removeChild(tempContainer);
+                    }
                     this.updateStatus('Error saving PDF: ' + error.message, 'error');
                 });
 
