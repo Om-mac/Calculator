@@ -318,46 +318,43 @@ class Calculator {
                 </div>
             `;
 
-            // Create temporary container that's in the DOM but hidden
-            const tempContainer = document.createElement('div');
-            tempContainer.style.position = 'absolute';
-            tempContainer.style.left = '-10000px';
-            tempContainer.style.width = '800px';
-            tempContainer.style.backgroundColor = 'white';
-            tempContainer.innerHTML = htmlString;
-            document.body.appendChild(tempContainer);
-
-            console.log('[DEBUG] Temp container added to DOM, starting pdf conversion');
-            console.log('[DEBUG] Table contains', historyReversed.length, 'rows');
+            // Create a proper element for html2pdf
+            const element = document.createElement('div');
+            element.innerHTML = htmlString;
+            element.style.padding = '20px';
+            element.style.backgroundColor = 'white';
+            element.style.minHeight = '400px';
+            
+            console.log('[DEBUG] HTML element created, table contains', historyReversed.length, 'rows');
 
             const opt = {
-                margin: 8,
+                margin: 10,
                 filename: `Calculator_History_${new Date().toISOString().split('T')[0]}.pdf`,
                 image: { type: 'jpeg', quality: 0.98 },
                 html2canvas: { 
                     scale: 2,
-                    logging: false,
+                    logging: true,
                     useCORS: true,
                     allowTaint: true,
-                    backgroundColor: '#ffffff'
+                    backgroundColor: '#ffffff',
+                    windowHeight: 1200,
+                    windowWidth: 800
                 },
                 jsPDF: { orientation: 'portrait', unit: 'mm', format: 'a4' }
             };
 
+            console.log('[DEBUG] Starting html2pdf with options:', opt);
+
             html2pdf()
                 .set(opt)
-                .from(tempContainer)
+                .from(element)
                 .save()
                 .then(() => {
                     console.log('[DEBUG] PDF export completed successfully');
-                    document.body.removeChild(tempContainer);
                     this.updateStatus('✅ PDF exported successfully with all ' + totalCalculations + ' calculations!', 'success');
                 })
                 .catch((error) => {
                     console.error('[ERROR] PDF save failed:', error);
-                    if (document.body.contains(tempContainer)) {
-                        document.body.removeChild(tempContainer);
-                    }
                     this.updateStatus('Error saving PDF: ' + error.message, 'error');
                 });
 
