@@ -1,26 +1,27 @@
 # 🧮 Full-Stack Calculator
 
-A modern, full-stack calculator application with a C++ backend engine, Node.js Express server, and responsive web frontend. Features real-time expression evaluation, calculation history, and keyboard support.
+A modern, full-stack calculator application with C++ backend engine, Node.js Express server, and responsive web frontend. Real-time expression evaluation, dark mode, calculation history with text export, and keyboard support.
 
 ![Version](https://img.shields.io/badge/version-1.0.0-blue.svg)
 ![License](https://img.shields.io/badge/license-MIT-green.svg)
 ![Node](https://img.shields.io/badge/node-%3E%3D14.0-brightgreen.svg)
 ![C++](https://img.shields.io/badge/C%2B%2B-17-blue.svg)
+![Status](https://img.shields.io/badge/status-active-brightgreen.svg)
 
 ---
 
 ## ✨ Features
 
-- 🎯 **Real-time Expression Evaluation** - Type expressions like `2+3*5` and get instant results
-- ⌨️ **Full Keyboard Support** - Use keyboard shortcuts for fast calculations
-- 📊 **Calculation History** - View and reuse previous calculations (stored in localStorage)
-- 📥 **Text Export** - Export your calculation history as a formatted text report
-- 🌙 **Dark Mode** - Toggle between light and dark themes with system preference detection
+- 🎯 **Real-time Expression Evaluation** - Instant results with proper operator precedence
+- ⌨️ **Keyboard Support** - Full keyboard shortcuts for fast calculations
+- 📊 **Calculation History** - Track and reuse previous calculations (localStorage)
+- 📥 **Text Export** - Export history as formatted .txt files
+- 🌙 **Dark Mode** - Toggle themes with system preference detection
 - 🎨 **Modern UI** - Beautiful gradient design with smooth animations
 - 🚀 **High Performance** - C++ backend for fast calculations
-- 📱 **Responsive Design** - Works seamlessly on desktop, tablet, and mobile
-- 🔄 **Fallback Mode** - Works offline with JavaScript evaluation if backend is unavailable
-- ⚙️ **Full Operator Precedence** - Proper mathematical expression parsing
+- 📱 **Responsive Design** - Works on desktop, tablet, and mobile
+- 🔄 **Fallback Mode** - JavaScript fallback when backend unavailable
+- ⚙️ **Operator Precedence** - Proper mathematical expression parsing
 
 ---
 
@@ -104,66 +105,57 @@ cd Calculator
 2. **Build C++ Backend**
 ```bash
 cd backend
-make clean
-make
+make clean && make
 cd ..
 ```
 
-3. **Install Node.js Dependencies**
+3. **Install Dependencies & Start**
 ```bash
-npm install
+npm install && npm start
 ```
 
-4. **Start the Server**
-```bash
-npm start
-```
-
-5. **Open in Browser**
+4. **Open Browser**
 Visit `http://localhost:3000` 🎉
 
 ---
 
 ## 💻 Usage
 
-### Using the Calculator
+### Calculator Operations
 
-**Mouse/Button Input:**
-- Click number buttons to build your expression
-- Click operators (+, -, *, /, %, ^)
+**Button/Mouse Input:**
+- Click numbers `0-9` to build expressions
+- Click operators `+`, `-`, `*`, `/`, `%`, `^`
 - Press `=` to calculate
-- Use `AC` to clear all
-- Use `DEL` to delete last character
-
-**Dark Mode:**
-- Click the 🌙 (moon) icon in the top-right corner to toggle dark mode
-- Your preference is automatically saved to localStorage
-- On first visit, the calculator respects your system's dark mode preference
-
-**Export History as Text:**
-- Click the **📥 Export History (TXT)** button below the history
-- A formatted text report will be downloaded with:
-  - All calculation history with timestamps
-  - Clean, readable formatting
-  - Summary statistics and generation date
-- Filename format: `Calculator_History_YYYY-MM-DD.txt`
+- `AC` clears all, `DEL` deletes last character
 
 **Keyboard Input:**
-- Type numbers: `0-9`
-- Type operators: `+ - * / % ^`
-- **Enter** - Calculate
-- **Backspace** - Delete last character
-- **Escape** - Clear all
-- **Type directly** in the input field
+- Type: `0-9`, `+`, `-`, `*`, `/`, `%`, `^`, `.`
+- `Enter` - Calculate
+- `Backspace` - Delete last character
+- `Escape` - Clear all
+
+**Dark Mode:**
+- Click 🌙 icon to toggle dark/light theme
+- Automatically saves preference to localStorage
+- Respects system preference on first visit
+
+**Export History as Text:**
+- Click the **📥 Export History (TXT)** button
+- Downloads formatted report with:
+  - All calculations with timestamps
+  - Summary statistics
+  - Clean, readable format
+- Filename: `Calculator_History_YYYY-MM-DD.txt`
 
 ### Examples
 
 ```
-2 + 3             = 5
-10 * 5 - 2        = 48
-100 / 4           = 25
-2 ^ 8             = 256
-(Complex expressions with proper operator precedence)
+2 + 3              = 5
+10 * 5 - 2         = 48
+100 / 4            = 25
+2 ^ 8              = 256
+10 % 3             = 1
 ```
 
 ---
@@ -228,28 +220,21 @@ npm start
 
 ### POST `/calculate`
 
-Send a mathematical expression to the backend.
+Send mathematical expressions to the backend.
 
 **Request:**
 ```json
-{
-  "expression": "2+3*5"
-}
+{ "expression": "2+3*5" }
 ```
 
 **Response (Success):**
 ```json
-{
-  "expression": "2+3*5",
-  "result": 17
-}
+{ "expression": "2+3*5", "result": 17 }
 ```
 
 **Response (Error):**
 ```json
-{
-  "error": "Division by zero"
-}
+{ "error": "Division by zero" }
 ```
 
 **Example with cURL:**
@@ -284,97 +269,75 @@ curl -X POST http://localhost:3000/calculate \
 
 ---
 
-## 🔍 Features in Detail
+## 🔍 Technical Details
 
 ### Expression Parser
-The C++ backend uses a recursive descent parser that:
-- Correctly handles operator precedence
+- Recursive descent parser in C++
+- Proper operator precedence
 - Supports parenthetical grouping
 - Handles floating-point numbers
-- Provides error handling for invalid expressions
+- Comprehensive error handling
 
 ### Fallback Mode
-If the C++ backend is unavailable:
-- Frontend automatically falls back to JavaScript evaluation
-- Full functionality remains (except power operation uses `**`)
+If C++ backend unavailable:
+- Switches to JavaScript evaluation
+- Full functionality maintained
 - Works completely offline
-- No loss of features
+- No feature loss
 
 ### Error Handling
-- Division by zero: Returns error message
-- Invalid expressions: Clear error feedback
-- Malformed input: Validation and user guidance
+- Division by zero detection
+- Invalid expression feedback
+- Input validation
+- User-friendly messages
 
 ---
 
 ## 🐛 Troubleshooting
 
-### Backend Not Starting
+**Backend Not Starting:**
 ```bash
-# Check if C++ binary exists
-ls -la backend/build/calculator
-
-# If not, rebuild:
-cd backend
-make clean
-make
-cd ..
+cd backend && make clean && make && cd ..
 ```
 
-### Port Already in Use
+**Port Already in Use:**
 ```bash
-# Find process using the port
-lsof -i :3000
-
-# Kill the process (if needed)
-kill -9 <PID>
-
-# Or use a different port
-PORT=3001 npm start
+lsof -i :3000  # Find process
+kill -9 <PID>   # Kill it
+PORT=3001 npm start  # Use different port
 ```
 
-### npm Modules Missing
+**npm Modules Missing:**
 ```bash
-# Reinstall dependencies
 rm -rf node_modules package-lock.json
 npm install
 ```
 
-### Git Push Issues
+**Git Configuration Issues:**
 ```bash
-# Configure git
 git config --global user.name "Your Name"
 git config --global user.email "your-email@example.com"
-
-# Then push
-git push -u origin main
 ```
-
----
 
 ## 📈 Performance
 
-- **Frontend Load Time**: < 1s
-- **Calculation Speed**: < 10ms (including network latency)
-- **History Limit**: 50 calculations (localStorage)
+- **Frontend Load**: < 1s
+- **Calculation Speed**: < 10ms (including network)
+- **History Limit**: 50 calculations
 - **UI Animations**: 60fps
-
----
 
 ## 🔐 Security
 
-- Input validation on both frontend and backend
-- Error messages don't expose system information
-- CORS enabled for safe cross-origin requests
+- Input validation (frontend & backend)
+- Error messages don't expose system info
+- CORS enabled for safe requests
 - No sensitive data stored locally
-
----
 
 ## 📝 Development
 
 ### Adding New Operations
 
-1. **Add to C++ calculator.h:**
+1. **Update C++ header (calculator.h):**
 ```cpp
 double sqrt(double a);
 ```
@@ -386,52 +349,42 @@ double Calculator::sqrt(double a) {
 }
 ```
 
-3. **Add to parseTerm in calculator.cpp:**
+3. **Add to parser (calculator.cpp):**
 ```cpp
-else if (op == '@') {  // @ for square root
-    result = sqrt(right);
-}
+else if (op == '@') result = sqrt(right);  // @ for sqrt
 ```
 
-4. **Update frontend (app.js):**
-Add button in HTML and handle in JavaScript
+4. **Update frontend button in app.js**
 
 ### Testing
 
-Test expressions:
-- `2+2` → 4
-- `10-3` → 7
-- `5*6` → 30
-- `20/4` → 5
-- `2^3` → 8
-- `10%3` → 1
-- `2+3*4` → 14 (tests precedence)
-
----
+```
+2+2 → 4
+10-3 → 7
+5*6 → 30
+20/4 → 5
+2^3 → 8
+10%3 → 1
+2+3*4 → 14 (precedence test)
+```
 
 ## 🤝 Contributing
 
 1. Fork the repository
-2. Create a feature branch (`git checkout -b feature/amazing-feature`)
-3. Commit your changes (`git commit -m 'Add amazing feature'`)
-4. Push to the branch (`git push origin feature/amazing-feature`)
-5. Open a Pull Request
-
----
+2. Create feature branch: `git checkout -b feature/my-feature`
+3. Commit changes: `git commit -m 'Add feature'`
+4. Push: `git push origin feature/my-feature`
+5. Open Pull Request
 
 ## 📜 License
 
-This project is licensed under the MIT License - see the LICENSE file for details.
-
----
+MIT License - see LICENSE file for details
 
 ## 👨‍💻 Author
 
-**Om Tapdiya** (Om-mac)
-- GitHub: [@Om-mac](https://github.com/Om-mac)
+**Om Tapdiya** (@Om-mac)
+- GitHub: [Om-mac](https://github.com/Om-mac)
 - Email: omtapdiya75@gmail.com
-
----
 
 ## 🙏 Acknowledgments
 
@@ -440,21 +393,16 @@ This project is licensed under the MIT License - see the LICENSE file for detail
 - Modern CSS practices
 - Open-source community
 
----
-
 ## 📞 Support
 
-For issues, questions, or suggestions:
-1. Open an [Issue](https://github.com/Om-mac/Calculator/issues)
-2. Email: omtapdiya75@gmail.com
-3. Check [API Documentation](docs/API.md)
-
----
+- Open an [Issue](https://github.com/Om-mac/Calculator/issues)
+- Email: omtapdiya75@gmail.com
+- Check [API Documentation](docs/API.md)
 
 ## 🔮 Future Enhancements
 
-- [ ] Scientific functions (sin, cos, tan, log, etc.)
-- [ ] Variables and memory storage (M+, M-, MR)
+- [ ] Scientific functions (sin, cos, tan, log)
+- [ ] Memory operations (M+, M-, MR)
 - [ ] Multiple language support
 - [ ] Mobile app (React Native)
 - [ ] Advanced equation solver
@@ -462,10 +410,10 @@ For issues, questions, or suggestions:
 - [ ] Custom function definitions
 - [ ] Export to CSV
 - [ ] Export to PDF
-- [ ] Calculation sharing (via URL)
+- [ ] Calculation sharing
 
 ---
 
 **Last Updated**: November 30, 2025
 
-**⭐ If you found this helpful, please give it a star on GitHub!**
+**⭐ Star this project if you found it helpful!**
