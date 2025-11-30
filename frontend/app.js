@@ -251,72 +251,164 @@ class Calculator {
 
         const currentDate = new Date().toLocaleString();
         const totalCalculations = this.history.length;
+        
+        // Build table rows
+        let tableRows = '';
+        const historyReversed = [...this.history].reverse();
+        
+        historyReversed.forEach((item, index) => {
+            tableRows += `
+                <tr style="background-color: ${index % 2 === 0 ? '#f9f9f9' : 'white'};">
+                    <td style="border: 1px solid #ddd; padding: 12px; text-align: center;">${index + 1}</td>
+                    <td style="border: 1px solid #ddd; padding: 12px; font-weight: bold;">${this.escapeHtml(item.expression)}</td>
+                    <td style="border: 1px solid #ddd; padding: 12px; color: #667eea; font-weight: bold; text-align: right;">${item.result}</td>
+                    <td style="border: 1px solid #ddd; padding: 12px; font-size: 12px; color: #999;">${item.timestamp}</td>
+                </tr>
+            `;
+        });
 
-        // Create HTML content for PDF
+        // Create complete HTML document
         const htmlContent = `
-            <div style="font-family: Arial, sans-serif; padding: 20px;">
-                <h1 style="color: #667eea; text-align: center;">Calculator History Report</h1>
-                <p style="text-align: center; color: #666;">
-                    Generated on ${currentDate}
-                </p>
-                
-                <hr style="border: 1px solid #667eea; margin: 20px 0;">
-                
-                <h2 style="color: #333; margin-top: 30px;">Calculation Summary</h2>
-                <p style="font-size: 14px; color: #666;">
-                    <strong>Total Calculations:</strong> ${totalCalculations}
-                </p>
-                
-                <h2 style="color: #333; margin-top: 30px;">Calculation Details</h2>
-                
-                <table style="width: 100%; border-collapse: collapse; margin-top: 15px;">
-                    <thead>
-                        <tr style="background-color: #667eea; color: white;">
-                            <th style="border: 1px solid #ddd; padding: 12px; text-align: left;">No.</th>
-                            <th style="border: 1px solid #ddd; padding: 12px; text-align: left;">Expression</th>
-                            <th style="border: 1px solid #ddd; padding: 12px; text-align: left;">Result</th>
-                            <th style="border: 1px solid #ddd; padding: 12px; text-align: left;">Time</th>
-                        </tr>
-                    </thead>
-                    <tbody>
-                        ${this.history.reverse().map((item, index) => `
-                            <tr style="background-color: ${index % 2 === 0 ? '#f9f9f9' : 'white'};">
-                                <td style="border: 1px solid #ddd; padding: 12px;">${index + 1}</td>
-                                <td style="border: 1px solid #ddd; padding: 12px; font-weight: bold;">${this.escapeHtml(item.expression)}</td>
-                                <td style="border: 1px solid #ddd; padding: 12px; color: #667eea; font-weight: bold;">${item.result}</td>
-                                <td style="border: 1px solid #ddd; padding: 12px; font-size: 12px; color: #999;">${item.timestamp}</td>
+            <!DOCTYPE html>
+            <html>
+            <head>
+                <meta charset="UTF-8">
+                <style>
+                    body {
+                        font-family: Arial, sans-serif;
+                        margin: 0;
+                        padding: 20px;
+                        background: white;
+                    }
+                    .header {
+                        text-align: center;
+                        margin-bottom: 30px;
+                        border-bottom: 3px solid #667eea;
+                        padding-bottom: 15px;
+                    }
+                    h1 {
+                        color: #667eea;
+                        margin: 10px 0;
+                        font-size: 28px;
+                    }
+                    .date {
+                        color: #666;
+                        font-size: 14px;
+                        margin: 5px 0;
+                    }
+                    .section {
+                        margin: 30px 0;
+                    }
+                    h2 {
+                        color: #333;
+                        font-size: 18px;
+                        border-bottom: 2px solid #667eea;
+                        padding-bottom: 10px;
+                        margin-bottom: 15px;
+                    }
+                    .summary {
+                        background: #f0f4ff;
+                        padding: 15px;
+                        border-radius: 5px;
+                        font-size: 14px;
+                    }
+                    .summary p {
+                        margin: 8px 0;
+                    }
+                    .summary strong {
+                        color: #667eea;
+                    }
+                    table {
+                        width: 100%;
+                        border-collapse: collapse;
+                        margin-top: 15px;
+                    }
+                    thead tr {
+                        background-color: #667eea;
+                        color: white;
+                    }
+                    th {
+                        border: 1px solid #ddd;
+                        padding: 12px;
+                        text-align: left;
+                        font-weight: bold;
+                    }
+                    td {
+                        border: 1px solid #ddd;
+                        padding: 12px;
+                    }
+                    .footer {
+                        text-align: center;
+                        font-size: 12px;
+                        color: #999;
+                        margin-top: 40px;
+                        border-top: 1px solid #ddd;
+                        padding-top: 20px;
+                    }
+                    .footer a {
+                        color: #667eea;
+                        text-decoration: none;
+                    }
+                </style>
+            </head>
+            <body>
+                <div class="header">
+                    <h1>📊 Calculator History Report</h1>
+                    <div class="date">Generated on ${currentDate}</div>
+                </div>
+
+                <div class="section">
+                    <h2>Summary</h2>
+                    <div class="summary">
+                        <p><strong>Total Calculations:</strong> ${totalCalculations}</p>
+                        <p><strong>Report Generated:</strong> ${currentDate}</p>
+                    </div>
+                </div>
+
+                <div class="section">
+                    <h2>Calculation Details</h2>
+                    <table>
+                        <thead>
+                            <tr>
+                                <th style="width: 10%; text-align: center;">No.</th>
+                                <th style="width: 40%;">Expression</th>
+                                <th style="width: 30%; text-align: right;">Result</th>
+                                <th style="width: 20%;">Time</th>
                             </tr>
-                        `).join('')}
-                    </tbody>
-                </table>
-                
-                <hr style="border: 1px solid #667eea; margin: 30px 0;">
-                
-                <p style="text-align: center; font-size: 12px; color: #999; margin-top: 40px;">
-                    This report was generated by Calculator v1.0.0<br>
-                    <a href="https://github.com/Om-mac/Calculator" style="color: #667eea;">GitHub Repository</a>
-                </p>
-            </div>
+                        </thead>
+                        <tbody>
+                            ${tableRows}
+                        </tbody>
+                    </table>
+                </div>
+
+                <div class="footer">
+                    <p>This report was generated by <strong>Calculator v1.0.0</strong></p>
+                    <p><a href="https://github.com/Om-mac/Calculator">View on GitHub</a></p>
+                </div>
+            </body>
+            </html>
         `;
 
-        // Create a temporary element to hold the content
+        // Create blob and download
+        const blob = new Blob([htmlContent], { type: 'text/html' });
+        const url = window.URL.createObjectURL(blob);
+        
+        // Use html2pdf to convert HTML to PDF
         const element = document.createElement('div');
         element.innerHTML = htmlContent;
 
-        // PDF options
         const opt = {
             margin: 10,
             filename: `Calculator_History_${new Date().toISOString().split('T')[0]}.pdf`,
             image: { type: 'jpeg', quality: 0.98 },
-            html2canvas: { scale: 2 },
+            html2canvas: { scale: 2, useCORS: true },
             jsPDF: { orientation: 'portrait', unit: 'mm', format: 'a4' }
         };
 
-        // Generate PDF
-        html2pdf().set(opt).from(element).save();
+        html2pdf().set(opt).from(htmlContent, 'string').save();
         
-        this.history.reverse(); // Reverse back to maintain order
-        this.updateStatus('PDF exported successfully!', 'success');
+        this.updateStatus('✅ PDF exported successfully!', 'success');
     }
 
     escapeHtml(text) {
