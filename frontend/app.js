@@ -246,6 +246,7 @@ class Calculator {
     exportToPDF() {
         console.log('[DEBUG] exportToPDF called');
         console.log('[DEBUG] History length:', this.history.length);
+        console.log('[DEBUG] jsPDF available:', typeof window.jsPDF !== 'undefined');
         
         if (this.history.length === 0) {
             this.updateStatus('No calculations to export', 'error');
@@ -257,13 +258,21 @@ class Calculator {
         
         console.log('[DEBUG] Creating PDF with jsPDF');
 
-        // Use jsPDF directly to create the PDF programmatically
-        const { jsPDF } = window;
-        const doc = new jsPDF({
-            orientation: 'portrait',
-            unit: 'mm',
-            format: 'a4'
-        });
+        try {
+            // Access jsPDF correctly from window
+            let jsPDFConstructor = window.jsPDF?.jsPDF || window.jsPDF;
+            console.log('[DEBUG] jsPDFConstructor:', typeof jsPDFConstructor);
+            
+            if (!jsPDFConstructor) {
+                throw new Error('jsPDF library not loaded');
+            }
+
+            // Use jsPDF directly to create the PDF programmatically
+            const doc = new jsPDFConstructor({
+                orientation: 'portrait',
+                unit: 'mm',
+                format: 'a4'
+            });
 
         let yPosition = 20;
         const pageWidth = doc.internal.pageSize.getWidth();
@@ -393,6 +402,12 @@ class Calculator {
         
         console.log('[DEBUG] PDF generated and saved successfully');
         this.updateStatus('✅ PDF exported successfully!', 'success');
+        } catch (error) {
+            console.error('[ERROR] PDF export failed:', error);
+            console.error('[ERROR] Error message:', error.message);
+            console.error('[ERROR] Stack:', error.stack);
+            this.updateStatus(`Error: ${error.message}`, 'error');
+        }
     }
 
     escapeHtml(text) {
