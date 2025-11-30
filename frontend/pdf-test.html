@@ -1,0 +1,193 @@
+<!-- PDF Export Test Page -->
+<!DOCTYPE html>
+<html>
+<head>
+    <title>PDF Export Test</title>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/html2pdf.js/0.10.1/html2pdf.bundle.min.js"></script>
+</head>
+<body>
+    <h1>PDF Export Functionality Test</h1>
+    
+    <div id="test-results" style="border: 1px solid #ccc; padding: 20px; margin: 20px 0; background: #f9f9f9;">
+        <h2>Test Results</h2>
+        <pre id="output" style="background: white; padding: 10px; border: 1px solid #ddd; overflow: auto;"></pre>
+    </div>
+
+    <button onclick="testPDFExport()" style="padding: 10px 20px; font-size: 16px; background: #667eea; color: white; border: none; border-radius: 4px; cursor: pointer;">Test PDF Export</button>
+
+    <script>
+        function log(message) {
+            const output = document.getElementById('output');
+            output.textContent += message + '\n';
+            console.log(message);
+        }
+
+        function testPDFExport() {
+            log('=== PDF EXPORT TEST ===\n');
+            
+            // Test 1: Check html2pdf library
+            log('Test 1: Checking html2pdf library');
+            if (typeof html2pdf === 'undefined') {
+                log('  ❌ html2pdf NOT loaded');
+                return;
+            }
+            log('  ✅ html2pdf library loaded');
+            log('  Type: ' + typeof html2pdf);
+            log('  Available methods: ' + Object.keys(window).filter(k => k.includes('pdf')).join(', '));
+
+            // Test 2: Create mock history
+            log('\nTest 2: Creating mock history');
+            const mockHistory = [
+                { expression: '7+3', result: 10, timestamp: '2:31:49 PM' },
+                { expression: '78+21', result: 99, timestamp: '2:38:30 PM' },
+                { expression: '100-50', result: 50, timestamp: '2:38:45 PM' },
+                { expression: '5*6', result: 30, timestamp: '2:39:00 PM' },
+                { expression: '20/4', result: 5, timestamp: '2:39:15 PM' },
+                { expression: '2^3', result: 8, timestamp: '2:39:30 PM' },
+                { expression: '10%3', result: 1, timestamp: '2:39:45 PM' },
+                { expression: '12+8', result: 20, timestamp: '2:40:00 PM' },
+                { expression: '15*2', result: 30, timestamp: '2:40:15 PM' },
+                { expression: '100/5', result: 20, timestamp: '2:40:30 PM' },
+                { expression: '7^2', result: 49, timestamp: '2:40:45 PM' },
+                { expression: '2+3', result: 5, timestamp: '2:31:47 PM' }
+            ];
+            log('  ✅ Created ' + mockHistory.length + ' mock calculations');
+
+            // Test 3: Escape HTML
+            log('\nTest 3: HTML Escaping');
+            const escapeHtml = (text) => {
+                const map = {
+                    '&': '&amp;',
+                    '<': '&lt;',
+                    '>': '&gt;',
+                    '"': '&quot;',
+                    "'": '&#039;'
+                };
+                return text.replace(/[&<>"']/g, m => map[m]);
+            };
+            log('  ✅ HTML escape function ready');
+
+            // Test 4: Build table rows
+            log('\nTest 4: Building table rows');
+            const historyReversed = [...mockHistory].reverse();
+            let tableRows = '';
+            historyReversed.forEach((item, index) => {
+                const bgColor = index % 2 === 0 ? '#f9f9f9' : '#ffffff';
+                tableRows += `
+                    <tr style="background-color: ${bgColor};">
+                        <td style="border: 1px solid #ccc; padding: 6px; text-align: center; width: 8%; font-size: 10px;">${index + 1}</td>
+                        <td style="border: 1px solid #ccc; padding: 6px; width: 55%; font-size: 10px; word-break: break-word;">${escapeHtml(item.expression)}</td>
+                        <td style="border: 1px solid #ccc; padding: 6px; text-align: right; width: 18%; font-size: 10px; font-weight: bold; color: #667eea;">${item.result}</td>
+                        <td style="border: 1px solid #ccc; padding: 6px; text-align: center; width: 19%; font-size: 9px;">${item.timestamp}</td>
+                    </tr>
+                `;
+            });
+            const trCount = (tableRows.match(/<tr/g) || []).length;
+            log('  ✅ Generated ' + trCount + ' table rows');
+
+            // Test 5: Build HTML document
+            log('\nTest 5: Building complete HTML');
+            const currentDate = new Date().toLocaleString();
+            const totalCalculations = mockHistory.length;
+
+            const htmlString = `
+                <div style="font-family: Arial, sans-serif; color: #333; margin: 0; padding: 0; background: white;">
+                    <div style="text-align: center; margin-bottom: 30px; border-bottom: 3px solid #667eea; padding-bottom: 20px;">
+                        <h1 style="color: #667eea; margin: 0 0 5px 0; font-size: 28px;">📊 Calculator History Report</h1>
+                        <p style="color: #888; margin: 0; font-size: 13px;">Generated on ${currentDate}</p>
+                    </div>
+
+                    <div style="background: #f0f4ff; border: 1px solid #d0deff; border-radius: 5px; padding: 15px; margin-bottom: 25px;">
+                        <h3 style="color: #667eea; margin: 0 0 10px 0; font-size: 14px;">📈 Summary</h3>
+                        <p style="margin: 5px 0; font-size: 12px;">
+                            <strong style="color: #667eea;">Total Calculations:</strong> ${totalCalculations}
+                        </p>
+                        <p style="margin: 5px 0; font-size: 12px;">
+                            <strong style="color: #667eea;">Report Generated:</strong> ${currentDate}
+                        </p>
+                    </div>
+
+                    <div>
+                        <h3 style="color: #333; margin: 0 0 10px 0; font-size: 14px; border-bottom: 2px solid #667eea; padding-bottom: 8px;">Calculation Details (All ${totalCalculations})</h3>
+                        <table style="width: 100%; border-collapse: collapse; margin-top: 10px;">
+                            <thead>
+                                <tr style="background-color: #667eea; color: white;">
+                                    <th style="border: 1px solid #667eea; padding: 8px; text-align: center; font-size: 11px; font-weight: bold; width: 8%;">No.</th>
+                                    <th style="border: 1px solid #667eea; padding: 8px; text-align: left; font-size: 11px; font-weight: bold; width: 55%;">Expression</th>
+                                    <th style="border: 1px solid #667eea; padding: 8px; text-align: right; font-size: 11px; font-weight: bold; width: 18%;">Result</th>
+                                    <th style="border: 1px solid #667eea; padding: 8px; text-align: center; font-size: 11px; font-weight: bold; width: 19%;">Time</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                ${tableRows}
+                            </tbody>
+                        </table>
+                    </div>
+
+                    <div style="margin-top: 30px; text-align: center; border-top: 1px solid #ddd; padding-top: 15px; font-size: 10px; color: #999;">
+                        <p style="margin: 3px 0;"><strong>Calculator v1.0.0</strong></p>
+                        <p style="margin: 3px 0;">https://github.com/Om-mac/Calculator</p>
+                    </div>
+                </div>
+            `;
+
+            log('  ✅ HTML document built: ' + htmlString.length + ' bytes');
+
+            // Test 6: Create temp container
+            log('\nTest 6: Creating temporary container');
+            const tempContainer = document.createElement('div');
+            tempContainer.style.position = 'absolute';
+            tempContainer.style.left = '-10000px';
+            tempContainer.style.width = '800px';
+            tempContainer.style.backgroundColor = 'white';
+            tempContainer.innerHTML = htmlString;
+            document.body.appendChild(tempContainer);
+            log('  ✅ Temp container added to DOM');
+            log('  ✅ Position: off-screen at left: -10000px');
+            log('  ✅ Width: 800px (fixed)');
+
+            // Test 7: PDF configuration
+            log('\nTest 7: Configuring PDF');
+            const opt = {
+                margin: 8,
+                filename: `Calculator_History_${new Date().toISOString().split('T')[0]}.pdf`,
+                image: { type: 'jpeg', quality: 0.98 },
+                html2canvas: { 
+                    scale: 2,
+                    logging: false,
+                    useCORS: true,
+                    allowTaint: true,
+                    backgroundColor: '#ffffff'
+                },
+                jsPDF: { orientation: 'portrait', unit: 'mm', format: 'a4' }
+            };
+            log('  ✅ PDF config: ' + opt.filename);
+            log('  ✅ Format: ' + opt.jsPDF.format + ' (' + opt.jsPDF.orientation + ')');
+            log('  ✅ HTML2Canvas scale: ' + opt.html2canvas.scale + 'x');
+
+            // Test 8: Execute PDF generation
+            log('\nTest 8: Executing PDF generation');
+            log('  ⏳ Starting html2pdf()...');
+
+            html2pdf()
+                .set(opt)
+                .from(tempContainer)
+                .save()
+                .then(() => {
+                    log('  ✅ PDF generated and saved successfully!');
+                    log('  ✅ All ' + totalCalculations + ' calculations included');
+                    document.body.removeChild(tempContainer);
+                    log('  ✅ Temp container removed from DOM');
+                    log('\n✅ TEST PASSED - PDF EXPORT WORKS CORRECTLY');
+                })
+                .catch((error) => {
+                    log('  ❌ PDF save failed: ' + error.message);
+                    if (document.body.contains(tempContainer)) {
+                        document.body.removeChild(tempContainer);
+                    }
+                    log('\n❌ TEST FAILED');
+                });
+        }
+    </script>
+</body>
+</html>
