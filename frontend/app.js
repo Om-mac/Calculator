@@ -3,11 +3,13 @@ class Calculator {
         this.expression = '';
         this.history = [];
         this.backendUrl = window.location.origin;
+        this.darkMode = false;
         this.init();
     }
 
     init() {
         this.cacheElements();
+        this.loadDarkModePreference();
         this.attachEventListeners();
         this.loadHistory();
         this.updateStatus('Ready');
@@ -20,6 +22,9 @@ class Calculator {
         this.clearHistoryBtn = document.getElementById('clear-history');
         this.status = document.getElementById('status');
         this.buttons = document.querySelectorAll('.btn');
+        this.themeToggle = document.getElementById('theme-toggle');
+        this.calculator = document.querySelector('.calculator');
+        this.body = document.body;
     }
 
     attachEventListeners() {
@@ -36,10 +41,48 @@ class Calculator {
 
         // History item click
         this.historyList.addEventListener('click', (e) => this.handleHistoryClick(e));
+
+        // Theme toggle
+        this.themeToggle.addEventListener('click', () => this.toggleDarkMode());
+    }
+
+    toggleDarkMode() {
+        this.darkMode = !this.darkMode;
+        this.applyDarkMode();
+        this.saveDarkModePreference();
+    }
+
+    applyDarkMode() {
+        if (this.darkMode) {
+            this.body.classList.add('dark-mode');
+            this.calculator.classList.add('dark-mode');
+            this.themeToggle.innerHTML = '<span class="theme-icon">☀️</span>';
+        } else {
+            this.body.classList.remove('dark-mode');
+            this.calculator.classList.remove('dark-mode');
+            this.themeToggle.innerHTML = '<span class="theme-icon">🌙</span>';
+        }
+    }
+
+    saveDarkModePreference() {
+        localStorage.setItem('darkMode', JSON.stringify(this.darkMode));
+    }
+
+    loadDarkModePreference() {
+        const saved = localStorage.getItem('darkMode');
+        if (saved !== null) {
+            this.darkMode = JSON.parse(saved);
+        } else {
+            // Check system preference
+            this.darkMode = window.matchMedia && window.matchMedia('(prefers-color-scheme: dark)').matches;
+        }
+        this.applyDarkMode();
     }
 
     handleButtonClick(event) {
-        const btn = event.target;
+        const btn = event.target.closest('.btn');
+        if (!btn) return;
+
         const value = btn.dataset.value;
         const action = btn.dataset.action;
 
@@ -181,7 +224,7 @@ class Calculator {
             const li = document.createElement('li');
             li.innerHTML = `
                 <strong>${item.expression}</strong> = <strong>${item.result}</strong>
-                <span style="font-size: 11px; color: #999;">${item.timestamp}</span>
+                <span style="font-size: 11px; opacity: 0.7; display: block;">${item.timestamp}</span>
             `;
             this.historyList.appendChild(li);
         });
