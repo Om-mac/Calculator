@@ -1,6 +1,6 @@
 # 🧮 Full-Stack Calculator
 
-A modern, full-stack calculator application with C++ backend engine, Node.js Express server, and responsive web frontend. Real-time expression evaluation, dark mode, calculation history with text export, and keyboard support.
+A modern, full-stack calculator with C++ backend, Express.js server, and beautiful responsive frontend. Features real-time expression evaluation, dark mode, calculation history with multi-format export (CSV/TXT), and full keyboard support.
 
 ![Version](https://img.shields.io/badge/version-1.0.0-blue.svg)
 ![License](https://img.shields.io/badge/license-MIT-green.svg)
@@ -15,9 +15,9 @@ A modern, full-stack calculator application with C++ backend engine, Node.js Exp
 - 🎯 **Real-time Expression Evaluation** - Instant results with proper operator precedence
 - ⌨️ **Keyboard Support** - Full keyboard shortcuts for fast calculations
 - 📊 **Calculation History** - Track and reuse previous calculations (localStorage)
-- 📥 **Text Export** - Export history as formatted .txt files
+- 📥 **Multi-Format Export** - Dropdown menu to export as CSV or TXT formats
 - 🌙 **Dark Mode** - Toggle themes with system preference detection
-- 🎨 **Modern UI** - Beautiful gradient design with smooth animations
+- 🎨 **Modern UI** - Beautiful gradients, animations, and glassmorphic design
 - 🚀 **High Performance** - C++ backend for fast calculations
 - 📱 **Responsive Design** - Works on desktop, tablet, and mobile
 - 🔄 **Fallback Mode** - JavaScript fallback when backend unavailable
@@ -140,13 +140,13 @@ Visit `http://localhost:3000` 🎉
 - Automatically saves preference to localStorage
 - Respects system preference on first visit
 
-**Export History as Text:**
-- Click the **📥 Export History (TXT)** button
-- Downloads formatted report with:
-  - All calculations with timestamps
-  - Summary statistics
-  - Clean, readable format
-- Filename: `Calculator_History_YYYY-MM-DD.txt`
+**Export History:**
+- Click **📥 Export ▼** button to open dropdown menu
+- Choose export format:
+  - **📊 Export as CSV** - Spreadsheet format with headers
+  - **📄 Export as TXT** - Formatted text report
+- Downloads with all calculations and timestamps
+- Filename: `Calculator_History_YYYY-MM-DD.csv` or `.txt`
 
 ### Examples
 
@@ -262,10 +262,11 @@ curl -X POST http://localhost:3000/calculate \
 
 ## 📊 Calculation History
 
-- **View History** - Scroll through the history panel on the right
-- **Click History Item** - Loads the expression and result back into the calculator
+- **View History** - Scroll through the history panel
+- **Click Item** - Load expression and result back into calculator
 - **Clear History** - Click "Clear History" button
-- **Persistence** - History is saved to browser's localStorage and persists across sessions
+- **Export** - Click dropdown menu to export as CSV or TXT
+- **Persistence** - Saved to localStorage, persists across sessions
 
 ---
 
@@ -408,9 +409,9 @@ MIT License - see LICENSE file for details
 - [ ] Advanced equation solver
 - [ ] Graphing calculator
 - [ ] Custom function definitions
-- [ ] Export to CSV
 - [ ] Export to PDF
 - [ ] Calculation sharing
+- [ ] Unit converter
 
 ---
 
