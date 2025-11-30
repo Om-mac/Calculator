@@ -1,0 +1,29 @@
+# Build directories
+backend/build/
+*.o
+*.a
+*.so
+
+# Executables
+calculator
+*.exe
+
+# IDEs
+.vscode/
+.idea/
+*.swp
+*.swo
+*~
+
+# OS
+.DS_Store
+Thumbs.db
+
+# Node (if using npm)
+node_modules/
+package-lock.json
+
+# CMake
+CMakeFiles/
+CMakeCache.txt
+cmake_install.cmake
