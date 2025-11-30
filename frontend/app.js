@@ -255,196 +255,19 @@ class Calculator {
         const currentDate = new Date().toLocaleString();
         const totalCalculations = this.history.length;
         
-        console.log('[DEBUG] Creating PDF with jsPDF autoTable');
+        console.log('[DEBUG] Creating PDF with html2pdf - chunked tables');
 
-        try {
-            // Access jsPDF and autoTable from html2pdf bundle
-            const jsPDF = window.jsPDF?.jsPDF || window.jsPDF;
-            
-            // Try to get autoTable plugin
-            let hasAutoTable = false;
-            if (window.jspdf && window.jspdf.jsPDF) {
-                hasAutoTable = typeof window.jspdf.jsPDF.autoTable === 'function';
-            }
-            
-            console.log('[DEBUG] jsPDF:', typeof jsPDF);
-            console.log('[DEBUG] hasAutoTable:', hasAutoTable);
-
-            // If jsPDF not available, fall back to html2pdf
-            if (!jsPDF) {
-                throw new Error('jsPDF not available, using HTML to PDF');
-            }
-
-            // Create PDF document
-            const doc = new jsPDF({
-                orientation: 'portrait',
-                unit: 'mm',
-                format: 'a4'
-            });
-
-            const historyReversed = [...this.history].reverse();
-            let yPosition = 20;
-
-            // Add title
-            doc.setFontSize(20);
-            doc.setTextColor(102, 126, 234);
-            doc.text('📊 Calculator History Report', 15, yPosition);
-            yPosition += 8;
-
-            // Add date
-            doc.setFontSize(11);
-            doc.setTextColor(100, 100, 100);
-            doc.text(`Generated on ${currentDate}`, 15, yPosition);
-            yPosition += 12;
-
-            // Add summary
-            doc.setFontSize(12);
-            doc.setTextColor(51, 51, 51);
-            doc.text('Summary', 15, yPosition);
-            yPosition += 6;
-
-            doc.setFontSize(10);
-            doc.text(`Total Calculations: ${totalCalculations}`, 20, yPosition);
-            yPosition += 8;
-
-            // Prepare table data
-            const tableData = historyReversed.map((item, index) => [
-                (index + 1).toString(),
-                this.escapeHtml(item.expression),
-                item.result.toString(),
-                item.timestamp
-            ]);
-
-            console.log('[DEBUG] Table data prepared with', tableData.length, 'rows');
-
-            // Add table using autoTable if available, otherwise manual rendering
-            if (hasAutoTable && typeof doc.autoTable === 'function') {
-                console.log('[DEBUG] Using autoTable');
-                doc.autoTable({
-                    head: [['No.', 'Expression', 'Result', 'Time']],
-                    body: tableData,
-                    startY: yPosition + 5,
-                    margin: { top: 10, right: 10, bottom: 10, left: 10 },
-                    columnStyles: {
-                        0: { cellWidth: 15, halign: 'center' },
-                        1: { cellWidth: 90 },
-                        2: { cellWidth: 40, halign: 'right', textColor: [102, 126, 234] },
-                        3: { cellWidth: 35 }
-                    },
-                    headStyles: {
-                        fillColor: [102, 126, 234],
-                        textColor: [255, 255, 255],
-                        fontStyle: 'bold'
-                    },
-                    bodyStyles: {
-                        textColor: [0, 0, 0]
-                    },
-                    alternateRowStyles: {
-                        fillColor: [249, 249, 249]
-                    }
-                });
-            } else {
-                console.log('[DEBUG] Using manual table rendering');
-                // Manual table rendering
-                const pageWidth = doc.internal.pageSize.getWidth();
-                const pageHeight = doc.internal.pageSize.getHeight();
-                const margin = 10;
-                const colWidths = [15, 90, 40, 35];
-                const rowHeight = 6;
-
-                // Draw table header
-                doc.setFillColor(102, 126, 234);
-                doc.setTextColor(255, 255, 255);
-                doc.setFont(undefined, 'bold');
-                doc.setFontSize(10);
-
-                let xPos = margin;
-                const headers = ['No.', 'Expression', 'Result', 'Time'];
-                headers.forEach((header, i) => {
-                    doc.rect(xPos, yPosition, colWidths[i], rowHeight, 'F');
-                    doc.text(header, xPos + 2, yPosition + 4);
-                    xPos += colWidths[i];
-                });
-
-                yPosition += rowHeight;
-                doc.setFont(undefined, 'normal');
-                doc.setTextColor(0, 0, 0);
-                doc.setFontSize(9);
-
-                // Draw table rows
-                tableData.forEach((row, rowIndex) => {
-                    // Check if we need a new page
-                    if (yPosition > pageHeight - 15) {
-                        doc.addPage();
-                        yPosition = 10;
-                    }
-
-                    // Alternate row colors
-                    if (rowIndex % 2 === 0) {
-                        doc.setFillColor(249, 249, 249);
-                        doc.rect(margin, yPosition, pageWidth - 2 * margin, rowHeight, 'F');
-                    }
-
-                    xPos = margin;
-                    row.forEach((cell, colIndex) => {
-                        const text = cell.toString().substring(0, 30); // Truncate long text
-                        if (colIndex === 2) {
-                            doc.setTextColor(102, 126, 234);
-                            doc.setFont(undefined, 'bold');
-                        } else {
-                            doc.setTextColor(0, 0, 0);
-                            doc.setFont(undefined, 'normal');
-                        }
-                        doc.text(text, xPos + 2, yPosition + 4);
-                        xPos += colWidths[colIndex];
-                    });
-
-                    yPosition += rowHeight;
-                });
-
-                // Add footer
-                doc.setFontSize(9);
-                doc.setTextColor(153, 153, 153);
-                doc.text('Calculator v1.0.0 | https://github.com/Om-mac/Calculator', margin, pageHeight - 5);
-            }
-
-            // Save PDF
-            doc.save(`Calculator_History_${new Date().toISOString().split('T')[0]}.pdf`);
-            
-            console.log('[DEBUG] PDF generated and saved successfully with', totalCalculations, 'calculations');
-            this.updateStatus('✅ PDF exported successfully with all calculations!', 'success');
-
-        } catch (error) {
-            console.error('[ERROR] PDF export with jsPDF failed:', error);
-            console.log('[DEBUG] Falling back to html2pdf approach');
-            
-            // Fallback to html2pdf if jsPDF fails
-            this.exportToPDFWithHtml2pdf(currentDate, totalCalculations);
-        }
-    }
-
-    exportToPDFWithHtml2pdf(currentDate, totalCalculations) {
         try {
             if (typeof html2pdf === 'undefined') {
                 throw new Error('html2pdf library not loaded');
             }
 
             const historyReversed = [...this.history].reverse();
+            const rowsPerTable = 5; // Smaller chunks for better rendering
             
-            let tableRows = '';
-            historyReversed.forEach((item, index) => {
-                const bgColor = index % 2 === 0 ? '#f9f9f9' : 'white';
-                tableRows += `<tr style="background-color: ${bgColor};">
-                    <td style="border: 1px solid #ddd; padding: 10px; text-align: center;">${index + 1}</td>
-                    <td style="border: 1px solid #ddd; padding: 10px;">${this.escapeHtml(item.expression)}</td>
-                    <td style="border: 1px solid #ddd; padding: 10px; color: #667eea; font-weight: bold; text-align: right;">${item.result}</td>
-                    <td style="border: 1px solid #ddd; padding: 10px; font-size: 12px;">${item.timestamp}</td>
-                </tr>`;
-            });
-
-            const element = document.createElement('div');
-            element.innerHTML = `
-                <div style="font-family: Arial, sans-serif; color: #333;">
+            // Create header and summary that stays on first page
+            let htmlContent = `
+                <div style="font-family: Arial, sans-serif; color: #333; page-break-after: always;">
                     <div style="text-align: center; border-bottom: 3px solid #667eea; padding-bottom: 20px; margin-bottom: 20px;">
                         <h1 style="color: #667eea; margin: 0; font-size: 24px;">📊 Calculator History Report</h1>
                         <p style="color: #666; margin: 10px 0 0 0;">Generated on ${currentDate}</p>
@@ -457,16 +280,37 @@ class Calculator {
                             <p style="margin: 5px 0;"><strong style="color: #667eea;">Report Generated:</strong> ${currentDate}</p>
                         </div>
                     </div>
+                </div>
+            `;
 
-                    <div>
-                        <h2 style="color: #333; font-size: 16px; border-bottom: 2px solid #667eea; padding-bottom: 8px; margin-bottom: 10px;">Calculation Details (All ${totalCalculations} Calculations)</h2>
-                        <table style="width: 100%; border-collapse: collapse; font-size: 11px;">
+            // Create multiple small tables, one per page
+            for (let pageNum = 0; pageNum < Math.ceil(historyReversed.length / rowsPerTable); pageNum++) {
+                const startIdx = pageNum * rowsPerTable;
+                const endIdx = Math.min(startIdx + rowsPerTable, historyReversed.length);
+                const pageRows = historyReversed.slice(startIdx, endIdx);
+                
+                let tableRows = '';
+                pageRows.forEach((item, idx) => {
+                    const actualIndex = startIdx + idx;
+                    const bgColor = actualIndex % 2 === 0 ? '#f0f0f0' : '#ffffff';
+                    tableRows += `<tr style="background-color: ${bgColor};">
+                        <td style="border: 1px solid #ddd; padding: 8px; text-align: center; font-size: 11px;">${actualIndex + 1}</td>
+                        <td style="border: 1px solid #ddd; padding: 8px; font-size: 11px;">${this.escapeHtml(item.expression)}</td>
+                        <td style="border: 1px solid #ddd; padding: 8px; text-align: right; font-size: 11px; color: #667eea; font-weight: bold;">${item.result}</td>
+                        <td style="border: 1px solid #ddd; padding: 8px; font-size: 10px;">${item.timestamp}</td>
+                    </tr>`;
+                });
+                
+                htmlContent += `
+                    <div style="font-family: Arial, sans-serif; color: #333; ${pageNum < Math.ceil(historyReversed.length / rowsPerTable) - 1 ? 'page-break-after: always;' : ''}">
+                        <h2 style="color: #333; font-size: 14px; margin: 0 0 10px 0;">Calculation Details ${pageNum > 0 ? '(Page ' + (pageNum + 1) + ')' : ''}</h2>
+                        <table style="width: 100%; border-collapse: collapse;">
                             <thead>
                                 <tr style="background-color: #667eea; color: white;">
-                                    <th style="border: 1px solid #ddd; padding: 8px; text-align: center; width: 8%;">No.</th>
-                                    <th style="border: 1px solid #ddd; padding: 8px; text-align: left; width: 40%;">Expression</th>
-                                    <th style="border: 1px solid #ddd; padding: 8px; text-align: right; width: 30%;">Result</th>
-                                    <th style="border: 1px solid #ddd; padding: 8px; text-align: left; width: 22%;">Time</th>
+                                    <th style="border: 1px solid #ddd; padding: 8px; text-align: center; font-size: 11px; font-weight: bold;">No.</th>
+                                    <th style="border: 1px solid #ddd; padding: 8px; text-align: left; font-size: 11px; font-weight: bold;">Expression</th>
+                                    <th style="border: 1px solid #ddd; padding: 8px; text-align: right; font-size: 11px; font-weight: bold;">Result</th>
+                                    <th style="border: 1px solid #ddd; padding: 8px; text-align: left; font-size: 11px; font-weight: bold;">Time</th>
                                 </tr>
                             </thead>
                             <tbody>
@@ -474,42 +318,49 @@ class Calculator {
                             </tbody>
                         </table>
                     </div>
+                `;
+            }
 
-                    <div style="margin-top: 20px; text-align: center; border-top: 1px solid #ddd; padding-top: 10px; font-size: 11px; color: #999;">
-                        <p style="margin: 3px 0;"><strong>Calculator v1.0.0</strong></p>
-                        <p style="margin: 3px 0;">https://github.com/Om-mac/Calculator</p>
-                    </div>
+            // Add footer
+            htmlContent += `
+                <div style="font-family: Arial, sans-serif; margin-top: 20px; text-align: center; border-top: 1px solid #ddd; padding-top: 10px; font-size: 10px; color: #999;">
+                    <p style="margin: 3px 0;"><strong>Calculator v1.0.0</strong></p>
+                    <p style="margin: 3px 0;">https://github.com/Om-mac/Calculator</p>
                 </div>
             `;
+
+            const element = document.createElement('div');
+            element.innerHTML = htmlContent;
 
             const opt = {
                 margin: [10, 10, 10, 10],
                 filename: `Calculator_History_${new Date().toISOString().split('T')[0]}.pdf`,
                 image: { type: 'jpeg', quality: 0.98 },
                 html2canvas: { 
-                    scale: 2, 
+                    scale: 1.5,
                     useCORS: true, 
                     logging: false, 
                     backgroundColor: '#ffffff',
                     allowTaint: true,
-                    windowHeight: 2000
+                    windowHeight: 600
                 },
                 jsPDF: { orientation: 'portrait', unit: 'mm', format: 'a4' }
             };
 
-            console.log('[DEBUG] Using html2pdf fallback');
+            console.log('[DEBUG] Generating PDF with', Math.ceil(historyReversed.length / rowsPerTable), 'pages');
             
             html2pdf().set(opt).from(element).save().then(() => {
-                console.log('[DEBUG] HTML2PDF export completed');
-                this.updateStatus('✅ PDF exported successfully!', 'success');
+                console.log('[DEBUG] PDF export completed with all', totalCalculations, 'calculations');
+                this.updateStatus('✅ PDF exported successfully with all calculations!', 'success');
             }).catch((error) => {
-                console.error('[ERROR] html2pdf save failed:', error);
+                console.error('[ERROR] PDF save failed:', error);
                 this.updateStatus('Error saving PDF', 'error');
             });
 
         } catch (error) {
-            console.error('[ERROR] Fallback PDF export failed:', error);
-            this.updateStatus('Error exporting PDF', 'error');
+            console.error('[ERROR] PDF export failed:', error);
+            console.error('[ERROR] Error message:', error.message);
+            this.updateStatus(`Error: ${error.message}`, 'error');
         }
     }    escapeHtml(text) {
         const map = {
