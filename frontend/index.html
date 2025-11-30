@@ -56,13 +56,17 @@
             <div class="history-section">
                 <h3>History</h3>
                 <ul id="history-list" class="history-list"></ul>
-                <button class="btn btn-clear-history" id="clear-history">Clear History</button>
+                <div class="history-buttons">
+                    <button class="btn btn-clear-history" id="clear-history">Clear History</button>
+                    <button class="btn btn-export-pdf" id="export-pdf">📥 Export PDF</button>
+                </div>
             </div>
 
             <div class="status" id="status">Ready</div>
         </div>
     </div>
 
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/html2pdf.js/0.10.1/html2pdf.bundle.min.js"></script>
     <script src="app.js"></script>
 </body>
 </html>

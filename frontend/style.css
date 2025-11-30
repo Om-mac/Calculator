@@ -279,6 +279,24 @@ body.dark-mode {
     background: var(--border-dark);
 }
 
+.btn-export-pdf {
+    background: linear-gradient(135deg, #51cf66 0%, #40c057 100%);
+    color: white;
+    width: 100%;
+    margin-top: 8px;
+    transition: all 0.3s ease;
+}
+
+.btn-export-pdf:hover {
+    background: linear-gradient(135deg, #40c057 0%, #37b24d 100%);
+}
+
+.history-buttons {
+    display: flex;
+    flex-direction: column;
+    gap: 8px;
+}
+
 .history-section {
     background: var(--bg-secondary-light);
     border-radius: 10px;
