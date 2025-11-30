@@ -14,6 +14,7 @@ A modern, full-stack calculator application with a C++ backend engine, Node.js E
 - 🎯 **Real-time Expression Evaluation** - Type expressions like `2+3*5` and get instant results
 - ⌨️ **Full Keyboard Support** - Use keyboard shortcuts for fast calculations
 - 📊 **Calculation History** - View and reuse previous calculations (stored in localStorage)
+- 🌙 **Dark Mode** - Toggle between light and dark themes with system preference detection
 - 🎨 **Modern UI** - Beautiful gradient design with smooth animations
 - 🚀 **High Performance** - C++ backend for fast calculations
 - 📱 **Responsive Design** - Works seamlessly on desktop, tablet, and mobile
@@ -132,6 +133,11 @@ Visit `http://localhost:3000` 🎉
 - Press `=` to calculate
 - Use `AC` to clear all
 - Use `DEL` to delete last character
+
+**Dark Mode:**
+- Click the 🌙 (moon) icon in the top-right corner to toggle dark mode
+- Your preference is automatically saved to localStorage
+- On first visit, the calculator respects your system's dark mode preference
 
 **Keyboard Input:**
 - Type numbers: `0-9`
@@ -440,12 +446,12 @@ For issues, questions, or suggestions:
 
 - [ ] Scientific functions (sin, cos, tan, log, etc.)
 - [ ] Variables and memory storage (M+, M-, MR)
-- [ ] Dark mode
 - [ ] Multiple language support
 - [ ] Mobile app (React Native)
 - [ ] Advanced equation solver
 - [ ] Graphing calculator
 - [ ] Custom function definitions
+- [ ] Export calculations as PDF
 
 ---
 
