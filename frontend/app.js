@@ -336,17 +336,43 @@ class Calculator {
             margin: 10,
             filename: `Calculator_History_${new Date().toISOString().split('T')[0]}.pdf`,
             image: { type: 'jpeg', quality: 0.98 },
-            html2canvas: { scale: 2, useCORS: true, logging: false },
+            html2canvas: { 
+                scale: 2, 
+                useCORS: true, 
+                logging: false,
+                allowTaint: true,
+                backgroundColor: '#ffffff'
+            },
             jsPDF: { orientation: 'portrait', unit: 'mm', format: 'a4' }
         };
 
         console.log('[DEBUG] html2pdf options:', opt);
         console.log('[DEBUG] About to call html2pdf().set().from().save()');
+        console.log('[DEBUG] Full pdfHTML being sent:', pdfHTML.substring(pdfHTML.indexOf('<table'), pdfHTML.indexOf('</table>') + 8));
 
         try {
-            html2pdf().set(opt).from(pdfHTML, 'string').save();
+            // Create a temporary div with the HTML content
+            const tempDiv = document.createElement('div');
+            tempDiv.innerHTML = pdfHTML;
+            tempDiv.style.position = 'absolute';
+            tempDiv.style.left = '-9999px';
+            tempDiv.style.width = '210mm';
+            tempDiv.style.backgroundColor = 'white';
+            document.body.appendChild(tempDiv);
+
+            console.log('[DEBUG] Created temporary div with PDF content');
+            console.log('[DEBUG] Table element found:', tempDiv.querySelector('table') ? 'YES' : 'NO');
+            console.log('[DEBUG] Tbody found:', tempDiv.querySelector('tbody') ? 'YES' : 'NO');
+            console.log('[DEBUG] Data rows in temp div:', tempDiv.querySelectorAll('tbody tr').length);
+
+            // Use the temporary element instead of string
+            html2pdf().set(opt).from(tempDiv).save();
+            
             console.log('[DEBUG] PDF export completed successfully');
             this.updateStatus('✅ PDF exported successfully!', 'success');
+            
+            // Clean up
+            setTimeout(() => document.body.removeChild(tempDiv), 500);
         } catch (error) {
             console.error('[ERROR] PDF export error:', error);
             console.error('[ERROR] Stack trace:', error.stack);
