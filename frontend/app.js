@@ -265,14 +265,23 @@ class Calculator {
 
             console.log('[DEBUG] html2pdf available:', typeof html2pdf);
 
-            // Build the HTML content for the PDF with pagination
+            // Build the HTML content for the PDF - ALL ROWS in single document
             const historyReversed = [...this.history].reverse();
-            const rowsPerPage = 8; // Show 8 rows per page
-            let pdfHTML = '';
             
-            // Add first page with header and summary
-            pdfHTML += `
-                <div style="font-family: Arial, sans-serif; color: #333; page-break-after: avoid;">
+            let tableRows = '';
+            historyReversed.forEach((item, index) => {
+                const bgColor = index % 2 === 0 ? '#f9f9f9' : 'white';
+                tableRows += `<tr style="background-color: ${bgColor};">
+                    <td style="border: 1px solid #ddd; padding: 10px; text-align: center;">${index + 1}</td>
+                    <td style="border: 1px solid #ddd; padding: 10px;">${this.escapeHtml(item.expression)}</td>
+                    <td style="border: 1px solid #ddd; padding: 10px; color: #667eea; font-weight: bold; text-align: right;">${item.result}</td>
+                    <td style="border: 1px solid #ddd; padding: 10px; font-size: 12px;">${item.timestamp}</td>
+                </tr>`;
+            });
+
+            const element = document.createElement('div');
+            element.innerHTML = `
+                <div style="font-family: Arial, sans-serif; color: #333;">
                     <div style="text-align: center; border-bottom: 3px solid #667eea; padding-bottom: 20px; margin-bottom: 20px;">
                         <h1 style="color: #667eea; margin: 0; font-size: 24px;">📊 Calculator History Report</h1>
                         <p style="color: #666; margin: 10px 0 0 0;">Generated on ${currentDate}</p>
@@ -285,37 +294,16 @@ class Calculator {
                             <p style="margin: 5px 0;"><strong style="color: #667eea;">Report Generated:</strong> ${currentDate}</p>
                         </div>
                     </div>
-                </div>
-            `;
-            
-            // Add table rows in chunks with page breaks
-            for (let pageNum = 0; pageNum < Math.ceil(historyReversed.length / rowsPerPage); pageNum++) {
-                const startIdx = pageNum * rowsPerPage;
-                const endIdx = Math.min(startIdx + rowsPerPage, historyReversed.length);
-                const pageRows = historyReversed.slice(startIdx, endIdx);
-                
-                let tableRows = '';
-                pageRows.forEach((item, idx) => {
-                    const actualIndex = startIdx + idx;
-                    const bgColor = actualIndex % 2 === 0 ? '#f9f9f9' : 'white';
-                    tableRows += `<tr style="background-color: ${bgColor};">
-                        <td style="border: 1px solid #ddd; padding: 10px; text-align: center;">${actualIndex + 1}</td>
-                        <td style="border: 1px solid #ddd; padding: 10px;">${this.escapeHtml(item.expression)}</td>
-                        <td style="border: 1px solid #ddd; padding: 10px; color: #667eea; font-weight: bold; text-align: right;">${item.result}</td>
-                        <td style="border: 1px solid #ddd; padding: 10px; font-size: 12px;">${item.timestamp}</td>
-                    </tr>`;
-                });
-                
-                pdfHTML += `
-                    <div style="font-family: Arial, sans-serif; color: #333; ${pageNum > 0 ? 'page-break-before: always;' : ''} padding: 20px 0;">
-                        ${pageNum === 0 ? `<h2 style="color: #333; font-size: 16px; border-bottom: 2px solid #667eea; padding-bottom: 8px; margin-bottom: 10px;">Calculation Details</h2>` : `<h3 style="color: #333; font-size: 14px; margin: 0 0 10px 0;">Calculation Details (continued)</h3>`}
-                        <table style="width: 100%; border-collapse: collapse; font-size: 12px;">
+
+                    <div>
+                        <h2 style="color: #333; font-size: 16px; border-bottom: 2px solid #667eea; padding-bottom: 8px; margin-bottom: 10px;">Calculation Details (All ${totalCalculations} Calculations)</h2>
+                        <table style="width: 100%; border-collapse: collapse; font-size: 11px;">
                             <thead>
                                 <tr style="background-color: #667eea; color: white;">
-                                    <th style="border: 1px solid #ddd; padding: 10px; text-align: center; width: 8%;">No.</th>
-                                    <th style="border: 1px solid #ddd; padding: 10px; text-align: left; width: 40%;">Expression</th>
-                                    <th style="border: 1px solid #ddd; padding: 10px; text-align: right; width: 30%;">Result</th>
-                                    <th style="border: 1px solid #ddd; padding: 10px; text-align: left; width: 22%;">Time</th>
+                                    <th style="border: 1px solid #ddd; padding: 8px; text-align: center; width: 8%;">No.</th>
+                                    <th style="border: 1px solid #ddd; padding: 8px; text-align: left; width: 40%;">Expression</th>
+                                    <th style="border: 1px solid #ddd; padding: 8px; text-align: right; width: 30%;">Result</th>
+                                    <th style="border: 1px solid #ddd; padding: 8px; text-align: left; width: 22%;">Time</th>
                                 </tr>
                             </thead>
                             <tbody>
@@ -323,33 +311,34 @@ class Calculator {
                             </tbody>
                         </table>
                     </div>
-                `;
-            }
-            
-            // Add footer on last content
-            pdfHTML += `
-                <div style="font-family: Arial, sans-serif; margin-top: 20px; page-break-before: avoid; text-align: center; border-top: 1px solid #ddd; padding-top: 10px; font-size: 11px; color: #999;">
-                    <p style="margin: 3px 0;"><strong>Calculator v1.0.0</strong></p>
-                    <p style="margin: 3px 0;">https://github.com/Om-mac/Calculator</p>
+
+                    <div style="margin-top: 20px; text-align: center; border-top: 1px solid #ddd; padding-top: 10px; font-size: 11px; color: #999;">
+                        <p style="margin: 3px 0;"><strong>Calculator v1.0.0</strong></p>
+                        <p style="margin: 3px 0;">https://github.com/Om-mac/Calculator</p>
+                    </div>
                 </div>
             `;
 
-            const element = document.createElement('div');
-            element.innerHTML = pdfHTML;
-
             const opt = {
-                margin: 10,
+                margin: [10, 10, 10, 10],
                 filename: `Calculator_History_${new Date().toISOString().split('T')[0]}.pdf`,
                 image: { type: 'jpeg', quality: 0.98 },
-                html2canvas: { scale: 2, useCORS: true, logging: false, backgroundColor: '#ffffff', allowTaint: true },
+                html2canvas: { 
+                    scale: 2, 
+                    useCORS: true, 
+                    logging: false, 
+                    backgroundColor: '#ffffff',
+                    allowTaint: true,
+                    windowHeight: 1400
+                },
                 jsPDF: { orientation: 'portrait', unit: 'mm', format: 'a4' }
             };
 
-            console.log('[DEBUG] About to generate PDF with', historyReversed.length, 'rows');
+            console.log('[DEBUG] About to generate PDF with', historyReversed.length, 'total rows');
             
             html2pdf().set(opt).from(element).save().then(() => {
-                console.log('[DEBUG] PDF generated and saved successfully');
-                this.updateStatus('✅ PDF exported successfully!', 'success');
+                console.log('[DEBUG] PDF generated and saved successfully with all', totalCalculations, 'calculations');
+                this.updateStatus('✅ PDF exported successfully with all calculations!', 'success');
             }).catch((error) => {
                 console.error('[ERROR] During save:', error);
                 this.updateStatus('Error saving PDF', 'error');
