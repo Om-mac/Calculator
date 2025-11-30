@@ -246,7 +246,6 @@ class Calculator {
     exportToPDF() {
         console.log('[DEBUG] exportToPDF called');
         console.log('[DEBUG] History length:', this.history.length);
-        console.log('[DEBUG] History content:', JSON.stringify(this.history));
         
         if (this.history.length === 0) {
             this.updateStatus('No calculations to export', 'error');
@@ -255,83 +254,77 @@ class Calculator {
 
         const currentDate = new Date().toLocaleString();
         const totalCalculations = this.history.length;
-        console.log('[DEBUG] Total calculations:', totalCalculations);
         
         // Build table rows HTML
         let tableRows = '';
         const historyReversed = [...this.history].reverse();
-        console.log('[DEBUG] History reversed:', JSON.stringify(historyReversed));
         
         historyReversed.forEach((item, index) => {
-            console.log(`[DEBUG] Processing row ${index}:`, item);
             const bgColor = index % 2 === 0 ? '#f9f9f9' : 'white';
-            const rowHTML = `<tr style="background-color: ${bgColor};">
+            tableRows += `<tr style="background-color: ${bgColor};">
                 <td style="border: 1px solid #ddd; padding: 10px; text-align: center; width: 10%;">${index + 1}</td>
                 <td style="border: 1px solid #ddd; padding: 10px; width: 40%;">${this.escapeHtml(item.expression)}</td>
                 <td style="border: 1px solid #ddd; padding: 10px; color: #667eea; font-weight: bold; text-align: right; width: 30%;">${item.result}</td>
                 <td style="border: 1px solid #ddd; padding: 10px; font-size: 12px; width: 20%;">${item.timestamp}</td>
             </tr>`;
-            tableRows += rowHTML;
-            console.log(`[DEBUG] Row ${index} HTML added, cumulative length: ${tableRows.length}`);
         });
+
+        console.log('[DEBUG] Table rows built, length:', tableRows.length);
+        console.log('[DEBUG] Number of rows:', historyReversed.length);
+
+        // Create a container element with all content
+        const container = document.createElement('div');
+        container.style.width = '210mm';
+        container.style.padding = '20px';
+        container.style.backgroundColor = '#ffffff';
+        container.style.color = '#333';
+        container.style.fontFamily = 'Arial, sans-serif';
+        container.innerHTML = `
+            <div style="text-align: center; border-bottom: 3px solid #667eea; padding-bottom: 20px; margin-bottom: 30px;">
+                <h1 style="color: #667eea; margin: 0; font-size: 28px;">📊 Calculator History Report</h1>
+                <p style="color: #666; margin: 10px 0 0 0; font-size: 14px;">Generated on ${currentDate}</p>
+            </div>
+
+            <div style="margin-bottom: 30px;">
+                <h2 style="color: #333; font-size: 18px; border-bottom: 2px solid #667eea; padding-bottom: 10px; margin-bottom: 15px;">Summary</h2>
+                <div style="background: #f0f4ff; padding: 15px; border-radius: 5px; font-size: 14px;">
+                    <p style="margin: 8px 0;"><strong style="color: #667eea;">Total Calculations:</strong> ${totalCalculations}</p>
+                    <p style="margin: 8px 0;"><strong style="color: #667eea;">Report Generated:</strong> ${currentDate}</p>
+                </div>
+            </div>
+
+            <div>
+                <h2 style="color: #333; font-size: 18px; border-bottom: 2px solid #667eea; padding-bottom: 10px; margin-bottom: 15px;">Calculation Details</h2>
+                <table style="width: 100%; border-collapse: collapse; margin-top: 15px;">
+                    <thead>
+                        <tr style="background-color: #667eea; color: white;">
+                            <th style="border: 1px solid #ddd; padding: 12px; text-align: center; width: 10%; font-weight: bold;">No.</th>
+                            <th style="border: 1px solid #ddd; padding: 12px; text-align: left; width: 40%; font-weight: bold;">Expression</th>
+                            <th style="border: 1px solid #ddd; padding: 12px; text-align: right; width: 30%; font-weight: bold;">Result</th>
+                            <th style="border: 1px solid #ddd; padding: 12px; text-align: left; width: 20%; font-weight: bold;">Time</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        ${tableRows}
+                    </tbody>
+                </table>
+            </div>
+
+            <div style="margin-top: 40px; text-align: center; border-top: 1px solid #ddd; padding-top: 20px; font-size: 12px; color: #999;">
+                <p style="margin: 5px 0;"><strong>Calculator v1.0.0</strong></p>
+                <p style="margin: 5px 0;"><a href="https://github.com/Om-mac/Calculator" style="color: #667eea; text-decoration: none;">View on GitHub</a></p>
+            </div>
+        `;
+
+        console.log('[DEBUG] Container created with innerHTML');
+        console.log('[DEBUG] Container has tbody:', container.querySelector('tbody') ? 'YES' : 'NO');
+        console.log('[DEBUG] Data rows in container:', container.querySelectorAll('tbody tr').length);
+
+        // Add to DOM temporarily for rendering
+        document.body.appendChild(container);
         
-        console.log('[DEBUG] Total table rows generated:', tableRows.length, 'characters');
-        console.log('[DEBUG] Table rows preview:', tableRows.substring(0, 200));
+        console.log('[DEBUG] Container added to DOM');
 
-        // Create the full HTML document as a string
-        const pdfHTML = `<!DOCTYPE html>
-<html>
-<head>
-<meta charset="UTF-8">
-<title>Calculator History Report</title>
-</head>
-<body style="font-family: Arial, sans-serif; margin: 20px; color: #333;">
-
-<div style="text-align: center; border-bottom: 3px solid #667eea; padding-bottom: 20px; margin-bottom: 30px;">
-    <h1 style="color: #667eea; margin: 0;">📊 Calculator History Report</h1>
-    <p style="color: #666; margin: 10px 0 0 0;">Generated on ${currentDate}</p>
-</div>
-
-<div style="margin-bottom: 30px;">
-    <h2 style="color: #333; border-bottom: 2px solid #667eea; padding-bottom: 10px;">Summary</h2>
-    <div style="background: #f0f4ff; padding: 15px; border-radius: 5px;">
-        <p><strong>Total Calculations:</strong> ${totalCalculations}</p>
-        <p><strong>Report Generated:</strong> ${currentDate}</p>
-    </div>
-</div>
-
-<div>
-    <h2 style="color: #333; border-bottom: 2px solid #667eea; padding-bottom: 10px;">Calculation Details</h2>
-    <table style="width: 100%; border-collapse: collapse; margin-top: 15px;">
-        <thead>
-            <tr style="background-color: #667eea; color: white;">
-                <th style="border: 1px solid #ddd; padding: 10px; text-align: center; width: 10%;">No.</th>
-                <th style="border: 1px solid #ddd; padding: 10px; text-align: left; width: 40%;">Expression</th>
-                <th style="border: 1px solid #ddd; padding: 10px; text-align: right; width: 30%;">Result</th>
-                <th style="border: 1px solid #ddd; padding: 10px; text-align: left; width: 20%;">Time</th>
-            </tr>
-        </thead>
-        <tbody>
-            ${tableRows}
-        </tbody>
-    </table>
-</div>
-
-<div style="margin-top: 40px; text-align: center; border-top: 1px solid #ddd; padding-top: 20px; font-size: 12px; color: #999;">
-    <p>This report was generated by <strong>Calculator v1.0.0</strong></p>
-    <p><a href="https://github.com/Om-mac/Calculator" style="color: #667eea; text-decoration: none;">View on GitHub</a></p>
-</div>
-
-</body>
-</html>`;
-
-        console.log('[DEBUG] PDF HTML generated');
-        console.log('[DEBUG] PDF HTML length:', pdfHTML.length);
-        console.log('[DEBUG] Contains tbody:', pdfHTML.includes('<tbody>'));
-        console.log('[DEBUG] Number of data rows in HTML:', (pdfHTML.match(/<tr style="background-color:/g) || []).length);
-        console.log('[DEBUG] PDF HTML preview:', pdfHTML.substring(0, 500));
-
-        // Use html2pdf to convert to PDF
         const opt = {
             margin: 10,
             filename: `Calculator_History_${new Date().toISOString().split('T')[0]}.pdf`,
@@ -340,42 +333,33 @@ class Calculator {
                 scale: 2, 
                 useCORS: true, 
                 logging: false,
-                allowTaint: true,
                 backgroundColor: '#ffffff'
             },
             jsPDF: { orientation: 'portrait', unit: 'mm', format: 'a4' }
         };
 
-        console.log('[DEBUG] html2pdf options:', opt);
-        console.log('[DEBUG] About to call html2pdf().set().from().save()');
-        console.log('[DEBUG] Full pdfHTML being sent:', pdfHTML.substring(pdfHTML.indexOf('<table'), pdfHTML.indexOf('</table>') + 8));
+        console.log('[DEBUG] About to generate PDF');
 
         try {
-            // Create a temporary div with the HTML content
-            const tempDiv = document.createElement('div');
-            tempDiv.innerHTML = pdfHTML;
-            tempDiv.style.position = 'absolute';
-            tempDiv.style.left = '-9999px';
-            tempDiv.style.width = '210mm';
-            tempDiv.style.backgroundColor = 'white';
-            document.body.appendChild(tempDiv);
-
-            console.log('[DEBUG] Created temporary div with PDF content');
-            console.log('[DEBUG] Table element found:', tempDiv.querySelector('table') ? 'YES' : 'NO');
-            console.log('[DEBUG] Tbody found:', tempDiv.querySelector('tbody') ? 'YES' : 'NO');
-            console.log('[DEBUG] Data rows in temp div:', tempDiv.querySelectorAll('tbody tr').length);
-
-            // Use the temporary element instead of string
-            html2pdf().set(opt).from(tempDiv).save();
-            
-            console.log('[DEBUG] PDF export completed successfully');
-            this.updateStatus('✅ PDF exported successfully!', 'success');
-            
-            // Clean up
-            setTimeout(() => document.body.removeChild(tempDiv), 500);
+            html2pdf()
+                .set(opt)
+                .from(container)
+                .save()
+                .then(() => {
+                    console.log('[DEBUG] PDF save completed');
+                    document.body.removeChild(container);
+                    this.updateStatus('✅ PDF exported successfully!', 'success');
+                })
+                .catch((error) => {
+                    console.error('[ERROR] During PDF generation:', error);
+                    document.body.removeChild(container);
+                    this.updateStatus('Error exporting PDF', 'error');
+                });
         } catch (error) {
             console.error('[ERROR] PDF export error:', error);
-            console.error('[ERROR] Stack trace:', error.stack);
+            if (document.body.contains(container)) {
+                document.body.removeChild(container);
+            }
             this.updateStatus('Error exporting PDF', 'error');
         }
     }
