@@ -365,7 +365,9 @@ class Calculator {
             console.error('[ERROR] PDF export failed:', error);
             this.updateStatus('Error exporting PDF: ' + error.message, 'error');
         }
-    }    escapeHtml(text) {
+    }
+
+    escapeHtml(text) {
         const map = {
             '&': '&amp;',
             '<': '&lt;',
