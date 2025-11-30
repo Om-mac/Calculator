@@ -1,0 +1,49 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>jsPDF Test</title>
+</head>
+<body>
+    <h1>Testing jsPDF Loading</h1>
+    <button onclick="testPDF()">Test PDF Generation</button>
+    <div id="result"></div>
+
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
+    <script>
+        function testPDF() {
+            const result = document.getElementById('result');
+            result.innerHTML = '';
+            
+            console.log('window.jsPDF:', window.jsPDF);
+            console.log('window.jsPDF?.jsPDF:', window.jsPDF?.jsPDF);
+            
+            result.innerHTML += '<p>window.jsPDF: ' + (typeof window.jsPDF) + '</p>';
+            result.innerHTML += '<p>window.jsPDF?.jsPDF: ' + (typeof window.jsPDF?.jsPDF) + '</p>';
+            
+            try {
+                // Try different ways to access jsPDF
+                let Constructor1 = window.jsPDF?.jsPDF;
+                let Constructor2 = window.jsPDF;
+                let Constructor3 = window.jsPDF?.default;
+                
+                result.innerHTML += '<p>Constructor1 (jsPDF?.jsPDF): ' + (typeof Constructor1) + '</p>';
+                result.innerHTML += '<p>Constructor2 (jsPDF): ' + (typeof Constructor2) + '</p>';
+                result.innerHTML += '<p>Constructor3 (jsPDF?.default): ' + (typeof Constructor3) + '</p>';
+                
+                const jsPDFLib = Constructor1 || Constructor2 || Constructor3;
+                
+                if (jsPDFLib && typeof jsPDFLib === 'function') {
+                    const doc = new jsPDFLib();
+                    doc.text('Test PDF', 10, 10);
+                    doc.save('test.pdf');
+                    result.innerHTML += '<p style="color: green;"><strong>SUCCESS: PDF generated!</strong></p>';
+                } else {
+                    result.innerHTML += '<p style="color: red;"><strong>ERROR: No valid constructor found</strong></p>';
+                }
+            } catch (error) {
+                result.innerHTML += '<p style="color: red;"><strong>Error: ' + error.message + '</strong></p>';
+            }
+        }
+    </script>
+</body>
+</html>

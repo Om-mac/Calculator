@@ -246,7 +246,6 @@ class Calculator {
     exportToPDF() {
         console.log('[DEBUG] exportToPDF called');
         console.log('[DEBUG] History length:', this.history.length);
-        console.log('[DEBUG] jsPDF available:', typeof window.jsPDF !== 'undefined');
         
         if (this.history.length === 0) {
             this.updateStatus('No calculations to export', 'error');
@@ -256,19 +255,19 @@ class Calculator {
         const currentDate = new Date().toLocaleString();
         const totalCalculations = this.history.length;
         
-        console.log('[DEBUG] Creating PDF with jsPDF');
+        console.log('[DEBUG] Creating PDF with html2pdf');
 
         try {
-            // Access jsPDF correctly from window
-            let jsPDFConstructor = window.jsPDF?.jsPDF || window.jsPDF;
-            console.log('[DEBUG] jsPDFConstructor:', typeof jsPDFConstructor);
+            // html2pdf bundle includes jsPDF, access it via the bundle
+            const jsPDF = window.jsPDF.jsPDF || window.jsPDF;
+            console.log('[DEBUG] jsPDF available:', typeof jsPDF);
             
-            if (!jsPDFConstructor) {
-                throw new Error('jsPDF library not loaded');
+            if (!jsPDF || typeof jsPDF !== 'function') {
+                throw new Error('jsPDF not properly loaded from html2pdf bundle');
             }
 
-            // Use jsPDF directly to create the PDF programmatically
-            const doc = new jsPDFConstructor({
+            // Create PDF document
+            const doc = new jsPDF({
                 orientation: 'portrait',
                 unit: 'mm',
                 format: 'a4'
