@@ -244,14 +244,67 @@ class Calculator {
     }
 
     exportToPDF() {
-        console.log('[DEBUG] exportToPDF called');
-        console.log('[DEBUG] History length:', this.history.length);
+        console.log('[DEBUG] Export button clicked');
         
         if (this.history.length === 0) {
             this.updateStatus('No calculations to export', 'error');
             return;
         }
 
+        // Show export format dialog
+        const choice = confirm('Choose export format:\n\nOK = CSV\nCancel = TXT');
+        
+        if (choice) {
+            this.exportToCSV();
+        } else {
+            this.exportToTXT();
+        }
+    }
+
+    exportToCSV() {
+        console.log('[DEBUG] Exporting as CSV');
+        
+        try {
+            const historyReversed = [...this.history].reverse();
+            const currentDate = new Date().toLocaleString();
+            
+            // CSV Header
+            let csv = 'No.,Expression,Result,Timestamp\n';
+            
+            // CSV Data
+            historyReversed.forEach((item, index) => {
+                const no = index + 1;
+                const expr = `"${item.expression.replace(/"/g, '""')}"`;  // Escape quotes
+                const result = item.result;
+                const timestamp = item.timestamp;
+                csv += `${no},${expr},${result},"${timestamp}"\n`;
+            });
+
+            console.log('[DEBUG] CSV generated, rows:', historyReversed.length);
+
+            // Create blob and download
+            const blob = new Blob([csv], { type: 'text/csv' });
+            const url = URL.createObjectURL(blob);
+            const a = document.createElement('a');
+            a.href = url;
+            a.download = `Calculator_History_${new Date().toISOString().split('T')[0]}.csv`;
+            document.body.appendChild(a);
+            a.click();
+            document.body.removeChild(a);
+            URL.revokeObjectURL(url);
+
+            console.log('[DEBUG] CSV file downloaded');
+            this.updateStatus(`✅ History exported as CSV (${historyReversed.length} calculations)`, 'success');
+
+        } catch (error) {
+            console.error('[ERROR] CSV export failed:', error);
+            this.updateStatus('Error exporting: ' + error.message, 'error');
+        }
+    }
+
+    exportToTXT() {
+        console.log('[DEBUG] Exporting as TXT');
+        
         try {
             const historyReversed = [...this.history].reverse();
             const currentDate = new Date().toLocaleString();
@@ -286,8 +339,7 @@ class Calculator {
             report += 'https://github.com/Om-mac/Calculator\n';
             report += '='.repeat(70) + '\n';
 
-            console.log('[DEBUG] Text report generated:');
-            console.log(report);
+            console.log('[DEBUG] Text report generated');
 
             // Create blob and download
             const blob = new Blob([report], { type: 'text/plain' });
@@ -300,11 +352,11 @@ class Calculator {
             document.body.removeChild(a);
             URL.revokeObjectURL(url);
 
-            console.log('[DEBUG] Text file downloaded');
+            console.log('[DEBUG] TXT file downloaded');
             this.updateStatus(`✅ History exported as TXT (${historyReversed.length} calculations)`, 'success');
 
         } catch (error) {
-            console.error('[ERROR] Export failed:', error);
+            console.error('[ERROR] TXT export failed:', error);
             this.updateStatus('Error exporting: ' + error.message, 'error');
         }
     }
