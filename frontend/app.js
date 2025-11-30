@@ -244,6 +244,10 @@ class Calculator {
     }
 
     exportToPDF() {
+        console.log('[DEBUG] exportToPDF called');
+        console.log('[DEBUG] History length:', this.history.length);
+        console.log('[DEBUG] History content:', JSON.stringify(this.history));
+        
         if (this.history.length === 0) {
             this.updateStatus('No calculations to export', 'error');
             return;
@@ -251,20 +255,28 @@ class Calculator {
 
         const currentDate = new Date().toLocaleString();
         const totalCalculations = this.history.length;
+        console.log('[DEBUG] Total calculations:', totalCalculations);
         
         // Build table rows HTML
         let tableRows = '';
         const historyReversed = [...this.history].reverse();
+        console.log('[DEBUG] History reversed:', JSON.stringify(historyReversed));
         
         historyReversed.forEach((item, index) => {
+            console.log(`[DEBUG] Processing row ${index}:`, item);
             const bgColor = index % 2 === 0 ? '#f9f9f9' : 'white';
-            tableRows += `<tr style="background-color: ${bgColor};">
+            const rowHTML = `<tr style="background-color: ${bgColor};">
                 <td style="border: 1px solid #ddd; padding: 10px; text-align: center; width: 10%;">${index + 1}</td>
                 <td style="border: 1px solid #ddd; padding: 10px; width: 40%;">${this.escapeHtml(item.expression)}</td>
                 <td style="border: 1px solid #ddd; padding: 10px; color: #667eea; font-weight: bold; text-align: right; width: 30%;">${item.result}</td>
                 <td style="border: 1px solid #ddd; padding: 10px; font-size: 12px; width: 20%;">${item.timestamp}</td>
             </tr>`;
+            tableRows += rowHTML;
+            console.log(`[DEBUG] Row ${index} HTML added, cumulative length: ${tableRows.length}`);
         });
+        
+        console.log('[DEBUG] Total table rows generated:', tableRows.length, 'characters');
+        console.log('[DEBUG] Table rows preview:', tableRows.substring(0, 200));
 
         // Create the full HTML document as a string
         const pdfHTML = `<!DOCTYPE html>
@@ -313,6 +325,12 @@ class Calculator {
 </body>
 </html>`;
 
+        console.log('[DEBUG] PDF HTML generated');
+        console.log('[DEBUG] PDF HTML length:', pdfHTML.length);
+        console.log('[DEBUG] Contains tbody:', pdfHTML.includes('<tbody>'));
+        console.log('[DEBUG] Number of data rows in HTML:', (pdfHTML.match(/<tr style="background-color:/g) || []).length);
+        console.log('[DEBUG] PDF HTML preview:', pdfHTML.substring(0, 500));
+
         // Use html2pdf to convert to PDF
         const opt = {
             margin: 10,
@@ -322,11 +340,16 @@ class Calculator {
             jsPDF: { orientation: 'portrait', unit: 'mm', format: 'a4' }
         };
 
+        console.log('[DEBUG] html2pdf options:', opt);
+        console.log('[DEBUG] About to call html2pdf().set().from().save()');
+
         try {
             html2pdf().set(opt).from(pdfHTML, 'string').save();
+            console.log('[DEBUG] PDF export completed successfully');
             this.updateStatus('✅ PDF exported successfully!', 'success');
         } catch (error) {
-            console.error('PDF export error:', error);
+            console.error('[ERROR] PDF export error:', error);
+            console.error('[ERROR] Stack trace:', error.stack);
             this.updateStatus('Error exporting PDF', 'error');
         }
     }
